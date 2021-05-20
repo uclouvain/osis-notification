@@ -19,7 +19,7 @@ Requirements
 
 Add `osis_notification` to `INSTALLED_APPS`:
 
-```
+```python
 INSTALLED_APPS = (
     ...
     'osis_notification',
@@ -29,26 +29,42 @@ INSTALLED_APPS = (
 
 # Using OSIS Notification
 
-`osis_notification` provides an API to create and send notifications and also a VueJS component to view them in the interface.``
+`osis_notification` provides an API to create and send notifications and also a VueJS component to view them in the interface.
 
-## Creating a web notification
+## Web notification
 
-A web notification is a simple text that will be shown to the user on the web interface :
+A web notification is a simple text that will be shown to the user on the web interface.
 
-```
-from osis_notification import create_web_notification
-create_web_notification(    person,    'A signature has been added to <a href="/demand/123">your admission demand</a>',)
-```
+### Create and send
 
-Note : you can inlude HTML in your message content, it will be rendered as  is in the front-end notification component. It is advised to use only  simple formatting HTML tags (a, strong, em, br).
+To create it, you must implement the `build` method from the abstract class `WebNotification` :
 
-## Creating an email notification
+```python
+from osis_notification.models import WebNotification
 
-An email notification is a email message that will be sent to the user once processed :
-
-```
-from osis_notification import create_email_notification
-create_email_notification(person, message)
+class AdmissionSendWebNotification(WebNotification):
+    def build(person, admission_notification_content):
+         content = f"hello {person}, you have a new message about your admission : {admission_notification_content}"
+         super().create(person, content)
 ```
 
-Note : it is advised to use `osis_mail_template.generate_email()` to format an EmailMessage properly
+This web notification will automatically be send by the task runner.
+
+## Email notification
+
+An email notification is a email message that will be sent to the user once processed.
+
+### Create and send
+
+To create it, you must implement the `build` method from the abstract class `MailNotification` :
+
+```python
+from osis_notification.models import MailNotification
+
+class AdmissionSendMailNotification(MailNotification):
+    def build(person, doctorate_request):
+         subject, content = render_email_content(NEW_ADMISSION_TEMPLATE, person.language, **tokens)
+         super().create(person, content)
+```
+
+This mail notification will automatically be send by the task runner.
