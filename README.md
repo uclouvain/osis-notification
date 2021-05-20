@@ -42,10 +42,11 @@ To create it, you must implement the `build` method from the abstract class `Web
 ```python
 from osis_notification.models import WebNotification
 
+
 class AdmissionSendWebNotification(WebNotification):
     def build(person, admission_notification_content):
-         content = f"hello {person}, you have a new message about your admission : {admission_notification_content}"
-         super().create(person, content)
+        content = f"hello {person}, you have a new message about your admission : {admission_notification_content}"
+        super().create(person, content)
 ```
 
 This web notification will automatically be send by the task runner.
@@ -61,10 +62,11 @@ To create it, you must implement the `build` method from the abstract class `Mai
 ```python
 from osis_notification.models import MailNotification
 
+
 class AdmissionSendMailNotification(MailNotification):
     def build(person, doctorate_request):
-         subject, content = render_email_content(NEW_ADMISSION_TEMPLATE, person.language, **tokens)
-         super().create(person, content)
+        subject, content = render_email_content(NEW_ADMISSION_TEMPLATE, person.language, **tokens)
+        super().create(person, content)
 ```
 
 This mail notification will automatically be send by the task runner.
