@@ -1,9 +1,7 @@
 try:
-    from .notifications import (
-        EmailNotification,
-        Notification,
-        WebNotification,
-    )
+    from .email_notification import EmailNotification
+    from .notification import Notification
+    from .web_notification import WebNotification
 except RuntimeError as e:  # pragma: no cover
     # There's a weird bug when running tests, the test runner seeing a models
     # package tries to import it directly, failing to do so
