@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 from base.models.person import Person
@@ -43,3 +44,47 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ["-created"]
+
+    def mark_as_read(self):
+        """Mark the notification's state as 'read' and save the reading's datetime."""
+
+        self.state = READ_STATE
+        self.read_datetime = now()
+        self.save()
+
+    def process(self):
+        raise NotImplementedError("Implement this method to process the notification")
+
+
+class WebNotification(Notification):
+    """Web notification model. Only handle the sending process, the build process has
+    to be implemented by the children class."""
+
+    class Meta:
+        verbose_name = _("Web notification")
+        proxy = True
+
+    def build(self, content):
+        raise NotImplementedError(
+            "Implement this method to build the notification content"
+        )
+
+    @classmethod
+    def create(cls, person, content):
+        """Create the Web Notification with the given person and content.
+        :param person: The Person object to send the notification to.
+        :param content: The content of the notification.
+        :return: The newly created WebNotification object.
+        """
+
+        return cls(
+            notification_type=WEB_TYPE,
+            person=person,
+            payload=content,
+        )
+
+    def process(self):
+        """Process the notification by sending the web notification."""
+
+        self.state = SENT_STATE
+        self.save()

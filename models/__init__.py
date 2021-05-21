@@ -5,6 +5,7 @@ try:
         PENDING_STATE,
         READ_STATE,
         SENT_STATE,
+        WebNotification,
         WEB_TYPE,
     )
 except RuntimeError as e:  # pragma: no cover
@@ -21,5 +22,6 @@ __all__ = [
     "PENDING_STATE",
     "READ_STATE",
     "SENT_STATE",
+    "WebNotification",
     "WEB_TYPE",
 ]
