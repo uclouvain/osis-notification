@@ -7,7 +7,7 @@ from django.utils.module_loading import import_string
 from django.utils.translation import gettext as _
 
 from osis_notification.models import Notification
-from osis_notification.models.enums import NotificationTypes
+from osis_notification.models.enums import NotificationStates, NotificationTypes
 
 
 class EmailNotification(Notification):
@@ -55,3 +55,5 @@ class EmailNotification(Notification):
                 cc=None,
             )
             mail_sender.send_mail()
+        self.state = NotificationStates.SENT_STATE.name
+        self.save()
