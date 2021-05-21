@@ -1,5 +1,6 @@
 try:
     from .notifications import (
+        EmailNotification,
         EMAIL_TYPE,
         Notification,
         PENDING_STATE,
@@ -17,6 +18,7 @@ except RuntimeError as e:  # pragma: no cover
         raise e
 
 __all__ = [
+    "EmailNotification",
     "EMAIL_TYPE",
     "Notification",
     "PENDING_STATE",
