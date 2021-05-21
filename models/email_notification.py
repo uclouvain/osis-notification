@@ -2,6 +2,7 @@ import email
 from html import unescape
 
 from django.conf import settings
+from django.db import models
 from django.utils.html import strip_tags
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext as _
@@ -10,9 +11,16 @@ from osis_notification.models import Notification
 from osis_notification.models.enums import NotificationStates, NotificationTypes
 
 
+class EmailNotificationManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(type=NotificationTypes.EMAIL_TYPE.name)
+
+
 class EmailNotification(Notification):
     """Email notification model. Only handle the sending process, the build process has
     to be implemented by the children class."""
+
+    objects = EmailNotificationManager()
 
     class Meta:
         verbose_name = _("Email notification")
