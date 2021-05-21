@@ -1,3 +1,4 @@
+from django.db import models
 from django.utils.translation import gettext as _
 
 from osis_notification.models import Notification
@@ -7,9 +8,16 @@ from osis_notification.models.enums import (
 )
 
 
+class WebNotificationManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(type=NotificationTypes.WEB_TYPE.name)
+
+
 class WebNotification(Notification):
     """Web notification model. Only handle the sending process, the build process has
     to be implemented by the children class."""
+
+    objects = WebNotificationManager()
 
     class Meta:
         verbose_name = _("Web notification")
