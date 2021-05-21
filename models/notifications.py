@@ -9,43 +9,39 @@ from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 from base.models.person import Person
-
-# Notification's types
-EMAIL_TYPE = "email"
-WEB_TYPE = "web"
-
-# Notification's states
-PENDING_STATE = "pending"
-SENT_STATE = "sent"
-READ_STATE = "read"
+from osis_notification.models.enums import (
+    NotificationStates,
+    NotificationTypes,
+)
 
 
 class Notification(models.Model):
     """Base class for a notification"""
 
-    TYPE_CHOICES = (
-        (EMAIL_TYPE, _("Email notification")),
-        (WEB_TYPE, _("Web notification")),
+    notification_type = models.CharField(
+        _("Type"),
+        choices=NotificationTypes.choices(),
+        max_length=10,
     )
-    STATE_CHOICES = (
-        (PENDING_STATE, _("Pending")),
-        (SENT_STATE, _("Sent")),
-        (READ_STATE, _("Read")),
-    )
-
-    notification_type = models.CharField(_("Type"), choices=TYPE_CHOICES, max_length=10)
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='+')
     payload = models.TextField(_("Payload"))
     state = models.CharField(
-        _("State"), choices=STATE_CHOICES, default=PENDING_STATE, max_length=10
+        _("State"),
+        choices=NotificationStates.choices(),
+        default=NotificationStates.PENDING_STATE.name,
+        max_length=10,
     )
 
     created = models.DateTimeField(verbose_name=_("Created"), auto_now_add=True)
     sent_datetime = models.DateTimeField(
-        verbose_name=_("Sent at"), editable=False, null=True
+        verbose_name=_("Sent at"),
+        editable=False,
+        null=True,
     )
     read_datetime = models.DateTimeField(
-        verbose_name=_("Read at"), editable=False, null=True
+        verbose_name=_("Read at"),
+        editable=False,
+        null=True,
     )
 
     class Meta:
@@ -54,7 +50,7 @@ class Notification(models.Model):
     def mark_as_read(self):
         """Mark the notification's state as 'read' and save the reading's datetime."""
 
-        self.state = READ_STATE
+        self.state = NotificationStates.READ_STATE.name
         self.read_datetime = now()
         self.save()
 
@@ -84,7 +80,7 @@ class WebNotification(Notification):
         """
 
         return cls(
-            notification_type=WEB_TYPE,
+            notification_type=NotificationTypes.WEB_TYPE.name,
             person=person,
             payload=content,
         )
@@ -92,7 +88,7 @@ class WebNotification(Notification):
     def process(self):
         """Process the notification by sending the web notification."""
 
-        self.state = SENT_STATE
+        self.state = NotificationStates.SENT_STATE.name
         self.save()
 
 
@@ -119,7 +115,7 @@ class EmailNotification(Notification):
 
         return cls(
             person=person,
-            notification_type=EMAIL_TYPE,
+            notification_type=NotificationTypes.EMAIL_TYPE.name,
             payload=content,
         )
 

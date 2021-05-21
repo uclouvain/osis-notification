@@ -1,13 +1,8 @@
 try:
     from .notifications import (
         EmailNotification,
-        EMAIL_TYPE,
         Notification,
-        PENDING_STATE,
-        READ_STATE,
-        SENT_STATE,
         WebNotification,
-        WEB_TYPE,
     )
 except RuntimeError as e:  # pragma: no cover
     # There's a weird bug when running tests, the test runner seeing a models
@@ -19,11 +14,6 @@ except RuntimeError as e:  # pragma: no cover
 
 __all__ = [
     "EmailNotification",
-    "EMAIL_TYPE",
     "Notification",
-    "PENDING_STATE",
-    "READ_STATE",
-    "SENT_STATE",
     "WebNotification",
-    "WEB_TYPE",
 ]
