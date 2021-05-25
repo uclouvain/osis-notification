@@ -2,10 +2,7 @@ from django.db import models
 from django.utils.translation import gettext as _
 
 from osis_notification.models import Notification
-from osis_notification.models.enums import (
-    NotificationStates,
-    NotificationTypes,
-)
+from osis_notification.models.enums import NotificationTypes
 
 
 class WebNotificationManager(models.Manager):
@@ -14,19 +11,13 @@ class WebNotificationManager(models.Manager):
 
 
 class WebNotification(Notification):
-    """Web notification model. Only handle the sending process, the build process has
-    to be implemented by the children class."""
+    """Web notification base model."""
 
     objects = WebNotificationManager()
 
     class Meta:
         verbose_name = _("Web notification")
         proxy = True
-
-    def build(self, content):
-        raise NotImplementedError(
-            "Implement this method to build the notification content"
-        )
 
     @classmethod
     def create(cls, person, content):
@@ -41,9 +32,3 @@ class WebNotification(Notification):
             person=person,
             payload=content,
         )
-
-    def process(self):
-        """Process the notification by sending the web notification."""
-
-        self.state = NotificationStates.SENT_STATE.name
-        self.save()

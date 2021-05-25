@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 from base.models.person import Person
@@ -40,13 +39,3 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ["-created"]
-
-    def mark_as_read(self):
-        """Mark the notification's state as 'read' and save the reading's datetime."""
-
-        self.state = NotificationStates.READ_STATE.name
-        self.read_datetime = now()
-        self.save()
-
-    def process(self):
-        raise NotImplementedError("Implement this method to process the notification")

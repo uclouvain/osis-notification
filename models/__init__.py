@@ -1,6 +1,6 @@
 try:
-    from .email_notification import EmailNotification
     from .notification import Notification
+    from .email_notification import EmailNotification
     from .web_notification import WebNotification
 except RuntimeError as e:  # pragma: no cover
     # There's a weird bug when running tests, the test runner seeing a models
