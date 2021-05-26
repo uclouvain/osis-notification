@@ -3,6 +3,7 @@ import email
 from django.test import TestCase
 
 from base.tests.factories.person import PersonFactory
+from osis_common.models import message_history
 from osis_notification.contrib.handlers import WebNotificationHandler, \
     EmailNotificationHandler
 from osis_notification.contrib.notification import (
@@ -10,6 +11,7 @@ from osis_notification.contrib.notification import (
     WebNotification as WebNotificationType,
 )
 from osis_notification.models import WebNotification, EmailNotification
+from osis_notification.models.enums import NotificationStates
 
 
 class HandlersTest(TestCase):
@@ -51,3 +53,25 @@ class HandlersTest(TestCase):
             ).get_payload().rstrip("\n"),
             self.email_notification_data["content"],
         )
+
+    def test_email_notification_handler_process_is_sending_the_email(self):
+        self.assertEqual(message_history.MessageHistory.objects.count(), 0)
+        email_notification = EmailNotificationHandler.create(self.email_notification)
+        self.assertEqual(
+            email_notification.state, NotificationStates.PENDING_STATE.name
+        )
+        self.assertIsNone(email_notification.sent_at)
+        EmailNotificationHandler.process(email_notification)
+        email_notification.refresh_from_db()
+        self.assertEqual(message_history.MessageHistory.objects.count(), 1)
+        self.assertEqual(email_notification.state, NotificationStates.SENT_STATE.name)
+        self.assertIsNotNone(email_notification.sent_at)
+
+    def test_web_notification_handler_process_is_changing_state(self):
+        web_notification = WebNotificationHandler.create(self.web_notification)
+        self.assertIsNone(web_notification.sent_at)
+        self.assertEqual(web_notification.state, NotificationStates.PENDING_STATE.name)
+        WebNotificationHandler.process(web_notification)
+        web_notification.refresh_from_db()
+        self.assertEqual(web_notification.state, NotificationStates.SENT_STATE.name)
+        self.assertIsNotNone(web_notification.sent_at)
