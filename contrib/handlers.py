@@ -1,4 +1,5 @@
 import email
+from email.message import EmailMessage
 from html import unescape
 from typing import Type
 
@@ -16,21 +17,30 @@ from osis_notification.models.enums import NotificationStates
 
 
 class EmailNotificationHandler:
-    """Email notification handler class. Only handle the sending process, the build
-    process has to be implemented by the children class."""
 
     @staticmethod
     def create(notification: Type[EmailNotificationType]):
-        # TODO serializer
-        # TODO email_message_to_string
+        """Create a email notification from a python object and save it in the database.
+
+        :param notification: An object containing the notification's content and the
+            person to send it to."""
+
+        mail = EmailMessage()
+        mail.set_content(notification.content)
+        mail["Subject"] = "To define"  # TODO define this
+        mail["From"] = settings.DEFAULT_FROM_EMAIL
+        mail["To"] = notification.recipient.user.email
+
         EmailNotification.objects.create(
-            person=notification.person,
-            content=notification.content,
+            person=notification.recipient,
+            payload=mail.as_string(),
         )
 
     @staticmethod
     def process(notification):
-        """Process the notification by sending the email."""
+        """Process the notification by sending the email.
+
+        :param notification: The notification to be send."""
 
         email_message = email.message_from_string(notification.payload)
         for mail_sender_class in settings.MAIL_SENDER_CLASSES:
@@ -53,24 +63,22 @@ class EmailNotificationHandler:
 
 
 class WebNotificationHandler:
-    """Web notification handler class."""
 
     @staticmethod
     def create(notification: Type[WebNotificationType]):
-        """Create and send the notification.
+        """Create a web notification from a python object and save it in the database.
 
         :param notification: An object containing the notification's content and the
             person to send it to."""
         return WebNotification.objects.create(
-            person=notification.person,
-            content=notification.content,
+            person=notification.recipient,
+            payload=notification.content,
         )
 
     @staticmethod
-    def process(notification_id):
+    def process(notification):
         """Process the notification by sending the web notification."""
 
-        notification = WebNotification.objects.get(id=notification_id)
         notification.state = NotificationStates.SENT_STATE.name
         notification.sent_datetime = now()
         notification.save()
