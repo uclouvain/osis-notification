@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext as _
 
+from base.models.person import Person
 from osis_notification.models import Notification
 from osis_notification.models.enums import NotificationTypes
 
@@ -8,6 +9,20 @@ from osis_notification.models.enums import NotificationTypes
 class WebNotificationManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(type=NotificationTypes.WEB_TYPE.name)
+
+    def create(self, person: Person, content: str):
+        """Create the Web Notification with the given person and content.
+        :param person: The Person object to send the notification to.
+        :param content: The content of the notification.
+        :return: The newly created WebNotification object.
+        """
+
+        return super().create(
+            type=NotificationTypes.WEB_TYPE.name,
+            person=person,
+            payload=content,
+        )
+
 
 
 class WebNotification(Notification):
@@ -18,17 +33,3 @@ class WebNotification(Notification):
     class Meta:
         verbose_name = _("Web notification")
         proxy = True
-
-    @classmethod
-    def create(cls, person, content):
-        """Create the Web Notification with the given person and content.
-        :param person: The Person object to send the notification to.
-        :param content: The content of the notification.
-        :return: The newly created WebNotification object.
-        """
-
-        return cls(
-            notification_type=NotificationTypes.WEB_TYPE.name,
-            person=person,
-            payload=content,
-        )
