@@ -19,7 +19,7 @@ from osis_notification.models.enums import NotificationStates
 class EmailNotificationHandler:
 
     @staticmethod
-    def create(notification: Type[EmailNotificationType]):
+    def create(notification: EmailNotificationType):
         """Create a email notification from a python object and save it in the database.
 
         :param notification: An object containing the notification's content and the
@@ -65,7 +65,7 @@ class EmailNotificationHandler:
 class WebNotificationHandler:
 
     @staticmethod
-    def create(notification: Type[WebNotificationType]):
+    def create(notification: WebNotificationType):
         """Create a web notification from a python object and save it in the database.
 
         :param notification: An object containing the notification's content and the
