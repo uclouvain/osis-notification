@@ -11,10 +11,10 @@ from osis_notification.models.enums import (
 class Notification(models.Model):
     """Base class for a notification"""
 
-    notification_type = models.CharField(
+    type = models.CharField(
         _("Type"),
         choices=NotificationTypes.choices(),
-        max_length=10,
+        max_length=25,
     )
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='+')
     payload = models.TextField(_("Payload"))
@@ -22,16 +22,16 @@ class Notification(models.Model):
         _("State"),
         choices=NotificationStates.choices(),
         default=NotificationStates.PENDING_STATE.name,
-        max_length=10,
+        max_length=25,
     )
 
     created = models.DateTimeField(verbose_name=_("Created"), auto_now_add=True)
-    sent_datetime = models.DateTimeField(
+    sent_at = models.DateTimeField(
         verbose_name=_("Sent at"),
         editable=False,
         null=True,
     )
-    read_datetime = models.DateTimeField(
+    read_at = models.DateTimeField(
         verbose_name=_("Read at"),
         editable=False,
         null=True,
