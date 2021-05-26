@@ -1,13 +1,13 @@
 import email
 from email.message import EmailMessage
 from html import unescape
-from typing import Type
 
 from django.conf import settings
 from django.utils.html import strip_tags
 from django.utils.module_loading import import_string
 from django.utils.timezone import now
 
+from osis_common.messaging.message_config import create_receiver
 from osis_notification.contrib.notification import (
     EmailNotification as EmailNotificationType,
     WebNotification as WebNotificationType,
@@ -31,7 +31,7 @@ class EmailNotificationHandler:
         mail["From"] = settings.DEFAULT_FROM_EMAIL
         mail["To"] = notification.recipient.user.email
 
-        EmailNotification.objects.create(
+        return EmailNotification.objects.create(
             person=notification.recipient,
             payload=mail.as_string(),
         )
@@ -43,22 +43,27 @@ class EmailNotificationHandler:
         :param notification: The notification to be send."""
 
         email_message = email.message_from_string(notification.payload)
+        receiver = create_receiver(
+            notification.person.id,
+            notification.person.user.email,
+            settings.LANGUAGE_CODE,
+        )
         for mail_sender_class in settings.MAIL_SENDER_CLASSES:
             MailSenderClass = import_string(mail_sender_class)
             mail_sender = MailSenderClass(
-                receivers=notification.person.email,
+                receivers=[receiver, ],
                 reference=None,
                 connected_user=None,
                 subject=unescape(strip_tags(email_message.get("subject"))),
                 message=unescape(strip_tags(email_message.get("body"))),
-                html_message=None,
+                html_message=unescape(strip_tags(email_message.get("body"))),  # TODO
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 attachment=None,
                 cc=None,
             )
             mail_sender.send_mail()
         notification.state = NotificationStates.SENT_STATE.name
-        notification.sent_datetime = now()
+        notification.sent_at = now()
         notification.save()
 
 
@@ -80,5 +85,5 @@ class WebNotificationHandler:
         """Process the notification by sending the web notification."""
 
         notification.state = NotificationStates.SENT_STATE.name
-        notification.sent_datetime = now()
+        notification.sent_at = now()
         notification.save()
