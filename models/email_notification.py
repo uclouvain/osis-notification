@@ -10,17 +10,17 @@ class EmailNotificationManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(type=NotificationTypes.EMAIL_TYPE.name)
 
-    def create(self, person: Person, content: str):
-        """Create the Email Notification with the given person and content.
+    def create(self, person: Person, payload: str):
+        """Create the Email Notification with the given person and payload.
         :param person: The Person object to send the notification to.
-        :param content: The content of the notification.
+        :param payload: The payload of the notification.
         :return: The newly created EmailNotification object.
         """
 
         return super().create(
             type=NotificationTypes.EMAIL_TYPE.name,
             person=person,
-            payload=content,
+            payload=payload,
         )
 
 
