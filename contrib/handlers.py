@@ -51,7 +51,7 @@ class EmailNotificationHandler:
         for mail_sender_class in settings.MAIL_SENDER_CLASSES:
             MailSenderClass = import_string(mail_sender_class)
             mail_sender = MailSenderClass(
-                receivers=[receiver, ],
+                receivers=[receiver],
                 reference=None,
                 connected_user=None,
                 subject=unescape(strip_tags(email_message.get("subject"))),
