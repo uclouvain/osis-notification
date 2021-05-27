@@ -10,17 +10,20 @@ class WebNotificationManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(type=NotificationTypes.WEB_TYPE.name)
 
-    def create(self, person: Person, payload: str):
+    def create(self, **kwargs):
         """Create the Web Notification with the given person and payload.
-        :param person: The Person object to send the notification to.
-        :param payload: The payload of the notification.
+
+        :param kwargs: See below ;
+            person (Person): The Person object to send the notification to.
+            payload (str): The payload of the notification.
+
         :return: The newly created WebNotification object.
         """
 
         return super().create(
             type=NotificationTypes.WEB_TYPE.name,
-            person=person,
-            payload=payload,
+            person=kwargs.get("person"),
+            payload=kwargs.get("payload"),
         )
 
 
