@@ -37,7 +37,7 @@ class EmailNotificationHandler:
         )
 
     @staticmethod
-    def process(notification):
+    def process(notification: EmailNotification):
         """Process the notification by sending the email.
 
         :param notification: The notification to be send."""
@@ -81,7 +81,7 @@ class WebNotificationHandler:
         )
 
     @staticmethod
-    def process(notification):
+    def process(notification: WebNotification):
         """Process the notification by sending the web notification."""
 
         notification.state = NotificationStates.SENT_STATE.name
