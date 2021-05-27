@@ -26,7 +26,10 @@ class EmailNotificationHandler:
             person to send it to."""
 
         mail = EmailMessage()
-        mail.set_content(notification.content)
+        # Set plain text content
+        mail.set_content(notification.plain_text_content)
+        # Set html content
+        mail.add_alternative(notification.html_content, subtype="html")
         mail["Subject"] = notification.subject
         mail["From"] = settings.DEFAULT_FROM_EMAIL
         mail["To"] = notification.recipient.user.email
@@ -48,6 +51,12 @@ class EmailNotificationHandler:
             notification.person.user.email,
             settings.LANGUAGE_CODE,
         )
+        for part in email_message.walk():
+            if part.get_content_type() == "text/plain":
+                plain_text_content = part.get_payload()
+            elif part.get_content_type() == "text/html":
+                html_content = part.get_payload()
+
         for mail_sender_class in settings.MAIL_SENDER_CLASSES:
             MailSenderClass = import_string(mail_sender_class)
             mail_sender = MailSenderClass(
@@ -55,8 +64,8 @@ class EmailNotificationHandler:
                 reference=None,
                 connected_user=None,
                 subject=unescape(strip_tags(email_message.get("subject"))),
-                message=unescape(strip_tags(email_message.get("body"))),
-                html_message=unescape(strip_tags(email_message.get("body"))),  # TODO
+                message=plain_text_content,
+                html_message=html_content,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 attachment=None,
                 cc=None,
@@ -75,6 +84,7 @@ class WebNotificationHandler:
 
         :param notification: An object containing the notification's content and the
             person to send it to."""
+
         return WebNotification.objects.create(
             person=notification.recipient,
             payload=notification.content,

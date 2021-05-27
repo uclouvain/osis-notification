@@ -27,7 +27,8 @@ class HandlersTest(TestCase):
         cls.email_notification_data = {
             "recipient": PersonFactory(),
             "subject": "Email notification test subject",
-            "content": "Email notification test content",
+            "plain_text_content": "Email notification test content as plain text",
+            "html_content": "<b>Email notification</b> test content as <i>html</i>",
         }
         cls.email_notification = EmailNotificationType(**cls.email_notification_data)
 
@@ -49,18 +50,22 @@ class HandlersTest(TestCase):
         self.assertEqual(
             email_notification.person, self.email_notification_data["recipient"]
         )
-        # TODO this next assertion could be better I think
+        email_message = email.message_from_string(email_notification.payload)
+        self.assertTrue(email_message.is_multipart())
+        # Now check the payload of each part (plain text and html)
+        for part in email_message.walk():
+            if part.get_content_type() == "text/plain":
+                self.assertEqual(
+                    part.get_payload().rstrip("\n"),
+                    self.email_notification_data["plain_text_content"],
+                )
+            elif part.get_content_type() == "text/html":
+                self.assertEqual(
+                    part.get_payload().rstrip("\n"),
+                    self.email_notification_data["html_content"],
+                )
         self.assertEqual(
-            email.message_from_string(
-                email_notification.payload
-            ).get_payload().rstrip("\n"),
-            self.email_notification_data["content"],
-        )
-        self.assertEqual(
-            email.message_from_string(
-                email_notification.payload
-            ).get("subject"),
-            self.email_notification_data["subject"],
+            email_message.get("subject"), self.email_notification_data["subject"],
         )
 
     def test_email_notification_handler_process_is_sending_the_email(self):
