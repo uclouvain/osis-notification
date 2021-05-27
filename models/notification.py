@@ -25,17 +25,9 @@ class Notification(models.Model):
         max_length=25,
     )
 
-    created = models.DateTimeField(verbose_name=_("Created"), auto_now_add=True)
-    sent_at = models.DateTimeField(
-        verbose_name=_("Sent at"),
-        editable=False,
-        null=True,
-    )
-    read_at = models.DateTimeField(
-        verbose_name=_("Read at"),
-        editable=False,
-        null=True,
-    )
+    created_at = models.DateTimeField(verbose_name=_("Created at"), auto_now_add=True)
+    sent_at = models.DateTimeField(verbose_name=_("Sent at"), editable=False, null=True)
+    read_at = models.DateTimeField(verbose_name=_("Read at"), editable=False, null=True)
 
     class Meta:
-        ordering = ["-created"]
+        ordering = ["-created_at"]
