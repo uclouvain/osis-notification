@@ -4,8 +4,10 @@ from django.test import TestCase
 
 from base.tests.factories.person import PersonFactory
 from osis_common.models import message_history
-from osis_notification.contrib.handlers import WebNotificationHandler, \
-    EmailNotificationHandler
+from osis_notification.contrib.handlers import (
+    WebNotificationHandler,
+    EmailNotificationHandler,
+)
 from osis_notification.contrib.notification import (
     EmailNotification as EmailNotificationType,
     WebNotification as WebNotificationType,
