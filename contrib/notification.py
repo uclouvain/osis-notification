@@ -3,14 +3,16 @@ from base.models.person import Person
 
 class EmailNotification(object):
 
-    def __init__(self, recipient: Person, content: str):
+    def __init__(self, recipient: Person, subject: str, content: str):
         """This class must be implemented in order to use the email notification
         handlers.
 
         :param recipient: Represent the notification's recipient and must be a Person
         instance.
+        :param subject: The subject of the email notification.
         :param content: Represent the content of the notification."""
         self.recipient = recipient
+        self.subject = subject
         self.content = content
 
 

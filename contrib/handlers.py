@@ -27,7 +27,7 @@ class EmailNotificationHandler:
 
         mail = EmailMessage()
         mail.set_content(notification.content)
-        mail["Subject"] = "To define"  # TODO define this
+        mail["Subject"] = notification.subject
         mail["From"] = settings.DEFAULT_FROM_EMAIL
         mail["To"] = notification.recipient.user.email
 

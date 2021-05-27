@@ -26,6 +26,7 @@ class HandlersTest(TestCase):
         cls.web_notification = WebNotificationType(**cls.web_notification_data)
         cls.email_notification_data = {
             "recipient": PersonFactory(),
+            "subject": "Email notification test subject",
             "content": "Email notification test content",
         }
         cls.email_notification = EmailNotificationType(**cls.email_notification_data)
@@ -54,6 +55,12 @@ class HandlersTest(TestCase):
                 email_notification.payload
             ).get_payload().rstrip("\n"),
             self.email_notification_data["content"],
+        )
+        self.assertEqual(
+            email.message_from_string(
+                email_notification.payload
+            ).get("subject"),
+            self.email_notification_data["subject"],
         )
 
     def test_email_notification_handler_process_is_sending_the_email(self):
