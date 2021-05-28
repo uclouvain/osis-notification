@@ -44,7 +44,8 @@ class HandlersTest(TestCase):
         )
 
     def test_email_notification_handler_creates_object_with_correct_values(self):
-        EmailNotificationHandler.create(self.email_notification)
+        email_message = EmailNotificationHandler.build(self.email_notification)
+        EmailNotificationHandler.create(email_message)
         self.assertEqual(EmailNotification.objects.count(), 1)
         email_notification = EmailNotification.objects.get()
         self.assertEqual(
@@ -70,7 +71,8 @@ class HandlersTest(TestCase):
 
     def test_email_notification_handler_process_is_sending_the_email(self):
         self.assertEqual(message_history.MessageHistory.objects.count(), 0)
-        email_notification = EmailNotificationHandler.create(self.email_notification)
+        email_message = EmailNotificationHandler.build(self.email_notification)
+        email_notification = EmailNotificationHandler.create(email_message)
         self.assertEqual(
             email_notification.state, NotificationStates.PENDING_STATE.name
         )
