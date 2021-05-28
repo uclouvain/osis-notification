@@ -21,7 +21,7 @@ install:
   - git submodule init
   - git submodule update
   - pip install -r requirements.txt
-  - rm -Rf notification
+  - rm -Rf osis_notification
   - ln -s $PROJECT_DIR osis_notification
   - cp osis_notification/.coveragerc .
 
@@ -44,4 +44,4 @@ script:
 
 after_success:
  - pip install python-coveralls
- - coveralls --base_dir /home/travis/build/uclouvain/osis-history/
+ - coveralls --base_dir /home/travis/build/uclouvain/osis-notification/

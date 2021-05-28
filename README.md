@@ -37,16 +37,22 @@ A web notification is a simple text that will be shown to the user on the web in
 
 ### Create and send
 
-To create it, you must implement the `build` method from the abstract class `WebNotification` :
+Initialize an object describing the notification you want to send : 
 
 ```python
-from osis_notification.models import WebNotification
+from osis_notification.contrib.notification import WebNotification
 
+recipient = Person.objects.get(user__username="jmr")
+content = "This is the content of the web notification"
+web_notification = WebNotification(recipient=recipient, content=content)
+```
 
-class AdmissionSendWebNotification(WebNotification):
-    def build(person, admission_notification_content):
-        content = f"hello {person}, you have a new message about your admission : {admission_notification_content}"
-        super().create(person, content)
+Then you have to give the objet to the WebNotificationHandler :
+
+```python
+from osis_notification.contrib.handlers import WebNotificationHandler
+
+WebNotificationHandler.create(web_notification)
 ```
 
 This web notification will automatically be send by the task runner.
@@ -57,16 +63,22 @@ An email notification is a email message that will be sent to the user once proc
 
 ### Create and send
 
-To create it, you must implement the `build` method from the abstract class `MailNotification` :
+Initialize an object describing the notification you want to send : 
 
 ```python
-from osis_notification.models import MailNotification
+from osis_notification.contrib.notification import EmailNotification
 
+recipient = Person.objects.get(user__username="jmr")
+content = "This is the content of the email notification"
+email_notification = EmailNotification(recipient=recipient, content=content)
+```
 
-class AdmissionSendMailNotification(MailNotification):
-    def build(person, doctorate_request):
-        subject, content = render_email_content(NEW_ADMISSION_TEMPLATE, person.language, **tokens)
-        super().create(person, content)
+Then you have to give the objet to the EmailNotificationHandler :
+
+```python
+from osis_notification.contrib.handlers import EmailNotificationHandler
+
+EmailNotificationHandler.create(email_notification)
 ```
 
 This mail notification will automatically be send by the task runner.
