@@ -59,9 +59,11 @@ This web notification will automatically be send by the task runner.
 
 ## Email notification
 
-An email notification is a email message that will be sent to the user once processed.
+An email notification is an email message that will be sent to the user once processed.
 
-### Create and send
+To be sent, an EmailNotification will need an EmailMessage. You can chose de build it on your own, using osis-mail-template for example. Or you can choose to use the handler to build it for you.
+
+### Build an EmailMessage and create an EmailNotification
 
 Initialize an object describing the notification you want to send : 
 
@@ -69,8 +71,38 @@ Initialize an object describing the notification you want to send :
 from osis_notification.contrib.notification import EmailNotification
 
 recipient = Person.objects.get(user__username="jmr")
-content = "This is the content of the email notification"
-email_notification = EmailNotification(recipient=recipient, content=content)
+language = recipient.language
+tokens = {"token_example": "value of the token example"}
+subject = "Notification subject"
+plain_text_content = "Plain text content"
+html_content = "<b>html</b> <i>content</i>"
+notification = EmailNotification(
+    recipient=recipient,
+    subject=subject,
+    plain_text_content=plain_text_content,
+    html_content=html_content,
+)
+```
+Use this object to build the EmailMessage and create the EmailNotification :
+```python
+from osis_notification.contrib.handlers import EmailNotificationHandler
+
+# Build the EmailMessage 
+email_message = EmailNotificationHandler.build(notification)
+# And finally create the EmailNotification
+email_notification = EmailNotificationHandler.create(email_message)
+```
+
+#### An example using osis_mail_template
+
+```python
+from osis_notification.contrib.handlers import EmailNotificationHandler
+
+recipient = Person.objects.get(user__username="jmr")
+language = recipient.language
+tokens = {"username": person.user.username}
+email_message = generate_email(your_mail_template_id, language, tokens, recipients=[recipient])
+email_notification = EmailNotificationHandler.create(email_message)
 ```
 
 Then you have to give the objet to the EmailNotificationHandler :
