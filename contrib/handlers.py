@@ -1,12 +1,14 @@
 import email
 from email.message import EmailMessage
 from html import unescape
+from typing import Optional
 
 from django.conf import settings
 from django.utils.html import strip_tags
 from django.utils.module_loading import import_string
 from django.utils.timezone import now
 
+from base.models.person import Person
 from osis_common.messaging.message_config import create_receiver
 from osis_notification.contrib.notification import (
     EmailNotification as EmailNotificationType,
@@ -19,13 +21,15 @@ from osis_notification.models.enums import NotificationStates
 class EmailNotificationHandler:
 
     @staticmethod
-    def create(notification: EmailNotificationType):
-        """Create a email notification from a python object and save it in the database.
+    def build(notification: EmailNotificationType) -> EmailMessage:
+        """Build a EmailMessage object from a EmailNotification object.
 
-        :param notification: An object containing the notification's content and the
-            person to send it to."""
+        :param notification: A EmailNotification object describing the email
+            notification to be send
+        :return: The built EmailMessage."""
 
         mail = EmailMessage()
+        mail.set_charset(settings.DEFAULT_CHARSET)
         # Set plain text content
         mail.set_content(notification.plain_text_content)
         # Set html content
@@ -34,8 +38,24 @@ class EmailNotificationHandler:
         mail["From"] = settings.DEFAULT_FROM_EMAIL
         mail["To"] = notification.recipient.user.email
 
+        return mail
+
+    @staticmethod
+    def create(
+        mail: EmailMessage,
+        person: Optional[Person] = None,
+    ) -> EmailNotification:
+        """Create a email notification from a python object and save it in the database.
+
+        :param mail: The email message to be send as a notification.
+        :param person: The recipient of the notification.
+        :return: The created EmailNotification."""
+
+        if person is None:
+            person = Person.objects.get(user__email=mail["To"])
+
         return EmailNotification.objects.create(
-            person=notification.recipient,
+            person=person,
             payload=mail.as_string(),
         )
 
