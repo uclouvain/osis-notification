@@ -6,7 +6,7 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import (
     EmailNotification as EmailNotificationType,
 )
-from osis_notification.tasks import notification_sender
+from osis_notification.tasks import email_notification_sender, web_notification_sender
 from osis_notification.tests.factories import (
     EmailNotificationFactory,
     WebNotificationFactory,
@@ -15,13 +15,15 @@ from osis_notification.tests.factories import (
 
 class TestNotificationSenderTask(TestCase):
 
-    @mock.patch("osis_notification.management.commands.send_notifications.Command")
+    @mock.patch("osis_notification.management.commands.send_web_notifications.Command")
     def test_send_web_notification(self, mock_send_notification):
         WebNotificationFactory()
-        notification_sender.run()
+        web_notification_sender.run()
         self.assertTrue(mock_send_notification.called)
 
-    @mock.patch("osis_notification.management.commands.send_notifications.Command")
+    @mock.patch(
+        "osis_notification.management.commands.send_email_notifications.Command"
+    )
     def test_send_email_notification(self, mock_send_notification):
         email_notification_data = {
             "recipient": PersonFactory(),
@@ -35,5 +37,5 @@ class TestNotificationSenderTask(TestCase):
             payload=email_message.as_string(),
             person=email_notification_data["recipient"],
         )
-        notification_sender.run()
+        email_notification_sender.run()
         self.assertTrue(mock_send_notification.called)

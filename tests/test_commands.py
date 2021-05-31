@@ -32,21 +32,26 @@ class SendNotificationsTest(TestCase):
             person=email_notification_data["recipient"],
         )
 
-    def test_send_notifications(self):
-        # ensure both email and web notifications are in pending state after creation
-        self.assertEqual(
-            self.web_notification.state, NotificationStates.PENDING_STATE.name
-        )
+    def test_send_email_notifications(self):
+        # ensure email notification is in pending state after creation
         self.assertEqual(
             self.email_notification.state, NotificationStates.PENDING_STATE.name
         )
-        call_command("send_notifications")
-        self.web_notification.refresh_from_db()
+        call_command("send_email_notifications")
         self.email_notification.refresh_from_db()
-        # now both notifications should be in sent state
-        self.assertEqual(
-            self.web_notification.state, NotificationStates.SENT_STATE.name
-        )
+        # now email notification should be in sent state
         self.assertEqual(
             self.email_notification.state, NotificationStates.SENT_STATE.name
+        )
+
+    def test_send_web_notifications(self):
+        # ensure web notification is in pending state after creation
+        self.assertEqual(
+            self.web_notification.state, NotificationStates.PENDING_STATE.name
+        )
+        call_command("send_web_notifications")
+        self.web_notification.refresh_from_db()
+        # now web notification should be in sent state
+        self.assertEqual(
+            self.web_notification.state, NotificationStates.SENT_STATE.name
         )

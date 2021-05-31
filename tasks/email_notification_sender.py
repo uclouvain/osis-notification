@@ -5,7 +5,7 @@ from backoffice.celery import app as celery_app
 
 @celery_app.task
 def run():
-    """This job will launch the Django command that will send all the pending
+    """This job will launch the Django command that will send all the pending email
     notifications."""
 
-    call_command("send_notifications")
+    call_command("send_email_notifications")
