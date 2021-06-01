@@ -12,8 +12,10 @@ class EmailNotificationManager(models.Manager):
     def pending(self):
         """Returns all the pending email notifications."""
 
-        return self.get_queryset().filter(
-            state=NotificationStates.PENDING_STATE.name
+        return (
+            self.get_queryset()
+            .filter(state=NotificationStates.PENDING_STATE.name)
+            .order_by("created_at")
         )
 
     def create(self, **kwargs):
