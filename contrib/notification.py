@@ -2,13 +2,12 @@ from base.models.person import Person
 
 
 class EmailNotification(object):
-
     def __init__(
-            self,
-            recipient: Person,
-            subject: str,
-            plain_text_content: str,
-            html_content: str,
+        self,
+        recipient: Person,
+        subject: str,
+        plain_text_content: str,
+        html_content: str,
     ):
         """This class must be implemented in order to use the email notification
         handlers.
@@ -26,7 +25,6 @@ class EmailNotification(object):
 
 
 class WebNotification(object):
-
     def __init__(self, recipient: Person, content: str):
         """This class must be implemented in order to use the web notification handlers.
 
