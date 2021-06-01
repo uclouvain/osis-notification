@@ -114,3 +114,17 @@ EmailNotificationHandler.create(email_notification)
 ```
 
 This mail notification will automatically be send by the task runner.
+
+## How notifications are sent?
+
+`osis_notification` is using Celery tasks to send notifications. Those tasks will call Django command to send both web and email notifications.
+
+You can call those commands this way :
+```python
+from django.core.management import call_command
+
+call_command("send_email_notifications")
+call_command("send_web_notifications")
+```
+
+The commands are calling the `process` function on their respective handlers for each notification that are found in the DB with the "Pending" state.
