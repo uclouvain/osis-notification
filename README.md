@@ -131,7 +131,7 @@ The commands are calling the `process` function on their respective handlers for
 
 ## How notifications are cleaned?
 
-To avoid database overflowing, all the sent notifications are deleted after a defined retention duration. You will have to define this duration in your Django settings like this :
+To avoid database overflowing, all the sent email notifications and the read web notifications are deleted after a defined retention duration. You will have to define this duration in your Django settings like this :
 
 ```python
 NOTIFICATIONS_RETENTION_DAYS = 15
@@ -139,10 +139,11 @@ NOTIFICATIONS_RETENTION_DAYS = 15
 
 This duration is set in days.
 
-A Celery task will call a Django command responsible for deleting all the notifications that are older than this duration and have been sent :
+A Celery task will call a Django command responsible for deleting all the notifications that are older than this duration and have been sent or read :
 
 ```python
 from django.core.management import call_command
 
 call_command("clean_email_notifications")
+call_command("clean_web_notifications")
 ```
