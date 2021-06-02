@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIRequestFactory
 
@@ -26,4 +27,9 @@ class IsNotificationRecipientTest(APITestCase):
     def test_permission_disallows_user_to_see_others_users_notifications(self):
         request = self.factory.get(self.url)
         request.user = PersonFactory().user
+        self.assertFalse(self.permission.has_permission(request, self.view))
+
+    def test_permission_disallows_anonymous_user_access(self):
+        request = self.factory.get(self.url)
+        request.user = AnonymousUser()
         self.assertFalse(self.permission.has_permission(request, self.view))
