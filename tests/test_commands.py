@@ -1,5 +1,4 @@
 from django.core.management import call_command
-from django.test import TestCase
 
 from base.tests.factories.person import PersonFactory
 from osis_notification.contrib.handlers import EmailNotificationHandler
@@ -7,6 +6,7 @@ from osis_notification.contrib.notification import (
     EmailNotification as EmailNotificationType,
 )
 from osis_notification.models.enums import NotificationStates
+from osis_notification.tests import TestCase
 from osis_notification.tests.factories import (
     EmailNotificationFactory,
     WebNotificationFactory,
@@ -37,7 +37,8 @@ class SendNotificationsTest(TestCase):
         self.assertEqual(
             self.email_notification.state, NotificationStates.PENDING_STATE.name
         )
-        call_command("send_email_notifications")
+        with self.assertNumQueriesLessThan(6):
+            call_command("send_email_notifications")
         self.email_notification.refresh_from_db()
         # now email notification should be in sent state
         self.assertEqual(
@@ -49,7 +50,8 @@ class SendNotificationsTest(TestCase):
         self.assertEqual(
             self.web_notification.state, NotificationStates.PENDING_STATE.name
         )
-        call_command("send_web_notifications")
+        with self.assertNumQueriesLessThan(3):
+            call_command("send_web_notifications")
         self.web_notification.refresh_from_db()
         # now web notification should be in sent state
         self.assertEqual(
