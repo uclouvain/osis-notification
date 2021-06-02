@@ -14,7 +14,6 @@ from osis_notification.tests.factories import (
 
 
 class TestNotificationSenderTask(TestCase):
-
     @mock.patch("osis_notification.management.commands.send_web_notifications.Command")
     def test_send_web_notification(self, mock_send_notification):
         WebNotificationFactory()

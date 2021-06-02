@@ -3,23 +3,15 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from base.tests.factories.person import PersonFactory
-from osis_notification.models import WebNotification
-from osis_notification.models.enums import NotificationStates, NotificationTypes
+from osis_notification.models.enums import NotificationStates
+from osis_notification.tests.factories import WebNotificationFactory
 
 
 class SentNotificationListViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.person = PersonFactory()
-        # TODO Replace this with the factory when PR will be merged
-        cls.web_notification_data = {
-            "type": NotificationTypes.WEB_TYPE.name,
-            "person": cls.person,
-            "payload": "Web notification test content",
-        }
-        cls.web_notification = WebNotification.objects.create(
-            **cls.web_notification_data
-        )
+        cls.web_notification = WebNotificationFactory(person=cls.person)
         cls.url = reverse(
             "osis_notification:notification-list",
             kwargs={"uuid": cls.person.uuid},
@@ -55,19 +47,12 @@ class SentNotificationListViewTest(APITestCase):
     def test_view_is_only_returning_users_notifications(self):
         self.web_notification.state = NotificationStates.SENT_STATE.name
         self.web_notification.save()
-        # TODO replace this with a factory
-        web_notification = WebNotification.objects.create(**self.web_notification_data)
+        web_notification = WebNotificationFactory(person=self.person)
         web_notification.state = NotificationStates.SENT_STATE.name
         web_notification.save()
         response = self.client.get(self.url)
         self.assertEqual(response.data["count"], 2)
-        # TODO replace this with a factory
-        WebNotification.objects.create(
-            state=NotificationStates.SENT_STATE.name,
-            type=NotificationTypes.WEB_TYPE.name,
-            person=PersonFactory(),
-            payload="Web notification test content with a different person",
-        )
+        WebNotificationFactory()
         response = self.client.get(self.url)
         # the result should be the same as the notification is for an other person
         self.assertEqual(response.data["count"], 2)
