@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -20,12 +21,12 @@ class SentNotificationListViewTest(APITestCase):
     def setUp(self):
         self.client.force_authenticate(user=self.person.user)
 
-    def test_view_allows_user_to_retrieve_his_notifications(self):
+    def test_allow_user_to_retrieve_his_notifications(self):
         # similar to the test in the `test_permissions` file, but with the response here
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_view_disallows_user_to_see_others_users_notifications(self):
+    def test_disallow_user_to_see_others_users_notifications(self):
         # similar to the test in the `test_permissions` file, but with the response here
         response = self.client.get(
             reverse(
@@ -35,7 +36,7 @@ class SentNotificationListViewTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_view_is_only_returning_users_sent_notifications(self):
+    def test_only_return_users_sent_notifications(self):
         response = self.client.get(self.url)
         # As the notification has not yet been sent, we should not retrieve it
         self.assertEqual(response.data["count"], 0)
@@ -44,7 +45,7 @@ class SentNotificationListViewTest(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.data["count"], 1)
 
-    def test_view_is_only_returning_users_notifications(self):
+    def test_only_return_users_notifications(self):
         self.web_notification.state = NotificationStates.SENT_STATE.name
         self.web_notification.save()
         web_notification = WebNotificationFactory(person=self.person)
@@ -56,3 +57,50 @@ class SentNotificationListViewTest(APITestCase):
         response = self.client.get(self.url)
         # the result should be the same as the notification is for an other person
         self.assertEqual(response.data["count"], 2)
+
+
+class MarkNotificationAsReadViewTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.person = PersonFactory()
+        cls.web_notification = WebNotificationFactory(person=cls.person)
+        cls.url = reverse(
+            "osis_notification:notification-mark-as-read",
+            kwargs={"uuid": cls.person.uuid, "pk": cls.web_notification.pk},
+        )
+
+    def setUp(self):
+        self.client.force_authenticate(user=self.person.user)
+
+    def test_mark_as_read_a_notification_that_is_not_sent_raises_a_404(self):
+        response = self.client.patch(self.url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_allow_user_to_mark_his_notification_as_read(self):
+        self.web_notification.state = NotificationStates.SENT_STATE.name
+        self.web_notification.save()
+        self.assertIsNone(self.web_notification.read_at)
+        response = self.client.patch(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["state"], NotificationStates.READ_STATE.name)
+        self.assertIsNotNone(response.data["read_at"])
+
+    def test_allow_user_to_mark_his_notification_as_unread(self):
+        self.web_notification.state = NotificationStates.READ_STATE.name
+        self.web_notification.read_at = now()
+        self.web_notification.save()
+        response = self.client.patch(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["state"], NotificationStates.SENT_STATE.name)
+        self.assertIsNone(response.data["read_at"])
+
+    def test_disallow_user_to_mark_others_users_notification_as_read(self):
+        person = PersonFactory()
+        web_notification = WebNotificationFactory(person=person)
+        response = self.client.patch(
+            reverse(
+                "osis_notification:notification-mark-as-read",
+                kwargs={"uuid": person.uuid, "pk": web_notification.pk},
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
