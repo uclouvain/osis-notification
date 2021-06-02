@@ -128,3 +128,21 @@ call_command("send_web_notifications")
 ```
 
 The commands are calling the `process` function on their respective handlers for each notification that are found in the DB with the "Pending" state.
+
+## How notifications are cleaned?
+
+To avoid database overflowing, all the sent notifications are deleted after a defined retention duration. You will have to define this duration in your Django settings like this :
+
+```python
+NOTIFICATIONS_RETENTION_DAYS = 15
+```
+
+This duration is set in days.
+
+A Celery task will call a Django command responsible for deleting all the notifications that are older than this duration and have been sent :
+
+```python
+from django.core.management import call_command
+
+call_command("clean_email_notifications")
+```
