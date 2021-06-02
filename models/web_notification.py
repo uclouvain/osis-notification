@@ -19,11 +19,17 @@ class WebNotificationManager(models.Manager):
         )
 
     def sent(self):
-        """Return all the sent notifications from oldest to newest."""
+        """Return all the sent notifications from oldest to newest, including all the
+        read notifications."""
 
         return (
             self.get_queryset()
-            .filter(state=NotificationStates.SENT_STATE.name)
+            .filter(
+                state__in=[
+                    NotificationStates.SENT_STATE.name,
+                    NotificationStates.READ_STATE.name,
+                ],
+            )
             .order_by("created_at")
         )
 
