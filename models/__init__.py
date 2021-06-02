@@ -7,7 +7,7 @@ except RuntimeError as e:  # pragma: no cover
     # package tries to import it directly, failing to do so
     import sys
 
-    if 'test' not in sys.argv:
+    if "test" not in sys.argv:
         raise e
 
 __all__ = [

@@ -16,7 +16,7 @@ class Notification(models.Model):
         choices=NotificationTypes.choices(),
         max_length=25,
     )
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='+')
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="+")
     payload = models.TextField(_("Payload"))
     state = models.CharField(
         _("State"),

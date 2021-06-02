@@ -66,7 +66,8 @@ class HandlersTest(TestCase):
                     self.email_notification_data["html_content"],
                 )
         self.assertEqual(
-            email_message.get("subject"), self.email_notification_data["subject"],
+            email_message.get("subject"),
+            self.email_notification_data["subject"],
         )
 
     def test_email_notification_handler_process_is_sending_the_email(self):
