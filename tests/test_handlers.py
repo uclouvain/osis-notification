@@ -14,6 +14,7 @@ from osis_notification.contrib.notification import (
 )
 from osis_notification.models import WebNotification, EmailNotification
 from osis_notification.models.enums import NotificationStates
+from osis_notification.tests.factories import WebNotificationFactory
 
 
 class HandlersTest(TestCase):
@@ -33,9 +34,9 @@ class HandlersTest(TestCase):
         cls.email_notification = EmailNotificationType(**cls.email_notification_data)
 
     def test_web_notification_handler_creates_object_with_correct_values(self):
-        WebNotificationHandler.create(self.web_notification)
-        self.assertEqual(WebNotification.objects.count(), 1)
-        web_notification = WebNotification.objects.get()
+        web_notifications_count = WebNotification.objects.count()
+        web_notification = WebNotificationHandler.create(self.web_notification)
+        self.assertEqual(WebNotification.objects.count(), web_notifications_count + 1)
         self.assertEqual(
             web_notification.person, self.web_notification_data["recipient"]
         )
@@ -92,3 +93,28 @@ class HandlersTest(TestCase):
         web_notification.refresh_from_db()
         self.assertEqual(web_notification.state, NotificationStates.SENT_STATE.name)
         self.assertIsNotNone(web_notification.sent_at)
+
+    def test_toggle_state_of_a_notification(self):
+        sent_web_notification = WebNotificationFactory()
+        sent_web_notification.state = NotificationStates.SENT_STATE.name
+        sent_web_notification.save()
+        WebNotificationHandler.toggle_state(sent_web_notification)
+        self.assertEqual(
+            sent_web_notification.state,
+            NotificationStates.READ_STATE.name,
+        )
+        WebNotificationHandler.toggle_state(sent_web_notification)
+        self.assertEqual(
+            sent_web_notification.state,
+            NotificationStates.SENT_STATE.name,
+        )
+
+    def test_mark_as_read_a_notification(self):
+        sent_web_notification = WebNotificationFactory()
+        sent_web_notification.state = NotificationStates.SENT_STATE.name
+        sent_web_notification.save()
+        WebNotificationHandler.mark_as_read(sent_web_notification)
+        self.assertEqual(
+            sent_web_notification.state,
+            NotificationStates.READ_STATE.name,
+        )

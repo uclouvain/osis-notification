@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from base.tests.factories.person import PersonFactory
+from osis_notification.models import WebNotification
 from osis_notification.models.enums import NotificationStates
 from osis_notification.tests.factories import WebNotificationFactory
 
@@ -90,3 +91,36 @@ class MarkNotificationAsReadViewTest(APITestCase):
             )
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class MarkAllNotificationsAsReadViewTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.person = PersonFactory()
+        # create several notifications with SENT status
+        cls.sent_notification_count = 10
+        for _ in range(cls.sent_notification_count):
+            web_notification = WebNotificationFactory(person=cls.person)
+            web_notification.state = NotificationStates.SENT_STATE.name
+            web_notification.sent_at = now()
+            web_notification.save()
+        cls.url = reverse("osis_notification:notification-mark-all-as-read")
+
+    def setUp(self):
+        self.client.force_authenticate(user=self.person.user)
+
+    def test_allow_user_to_mark_all_his_notifications_as_read(self):
+        self.assertEqual(
+            WebNotification.objects.filter(
+                state=NotificationStates.SENT_STATE.name
+            ).count(),
+            self.sent_notification_count,
+        )
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            WebNotification.objects.filter(
+                state=NotificationStates.READ_STATE.name
+            ).count(),
+            self.sent_notification_count,
+        )
