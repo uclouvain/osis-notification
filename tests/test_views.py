@@ -13,28 +13,14 @@ class SentNotificationListViewTest(APITestCase):
     def setUpTestData(cls):
         cls.person = PersonFactory()
         cls.web_notification = WebNotificationFactory(person=cls.person)
-        cls.url = reverse(
-            "osis_notification:notification-list",
-            kwargs={"person_uuid": cls.person.uuid},
-        )
+        cls.url = reverse("osis_notification:notification-list")
 
     def setUp(self):
         self.client.force_authenticate(user=self.person.user)
 
     def test_allow_user_to_retrieve_his_notifications(self):
-        # similar to the test in the `test_permissions` file, but with the response here
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_disallow_user_to_see_others_users_notifications(self):
-        # similar to the test in the `test_permissions` file, but with the response here
-        response = self.client.get(
-            reverse(
-                "osis_notification:notification-list",
-                kwargs={"person_uuid": PersonFactory().uuid},
-            )
-        )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_only_return_users_sent_notifications(self):
         response = self.client.get(self.url)
@@ -66,10 +52,7 @@ class MarkNotificationAsReadViewTest(APITestCase):
         cls.web_notification = WebNotificationFactory(person=cls.person)
         cls.url = reverse(
             "osis_notification:notification-mark-as-read",
-            kwargs={
-                "person_uuid": cls.person.uuid,
-                "notification_uuid": cls.web_notification.uuid,
-            },
+            kwargs={"notification_uuid": cls.web_notification.uuid},
         )
 
     def setUp(self):
@@ -103,10 +86,7 @@ class MarkNotificationAsReadViewTest(APITestCase):
         response = self.client.patch(
             reverse(
                 "osis_notification:notification-mark-as-read",
-                kwargs={
-                    "person_uuid": person.uuid,
-                    "notification_uuid": web_notification.uuid,
-                },
+                kwargs={"notification_uuid": web_notification.uuid},
             )
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
