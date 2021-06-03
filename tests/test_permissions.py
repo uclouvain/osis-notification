@@ -13,11 +13,11 @@ class IsNotificationRecipientTest(APITestCase):
         cls.person = PersonFactory()
         cls.url = reverse(
             "osis_notification:notification-list",
-            kwargs={"uuid": cls.person.uuid},
+            kwargs={"person_uuid": cls.person.uuid},
         )
         cls.permission = IsNotificationRecipient()
         cls.factory = APIRequestFactory()
-        cls.view = SentNotificationListView(kwargs={"uuid": cls.person.uuid})
+        cls.view = SentNotificationListView(kwargs={"person_uuid": cls.person.uuid})
 
     def test_permission_allows_user_to_retrieve_his_notifications(self):
         request = self.factory.get(self.url)

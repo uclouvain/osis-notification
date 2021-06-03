@@ -7,9 +7,13 @@ from osis_notification.api.views import (
 
 app_name = "osis_notification"
 urlpatterns = [
-    path("<uuid:uuid>/", SentNotificationListView.as_view(), name="notification-list"),
     path(
-        "<uuid:uuid>/<int:pk>/",
+        "<uuid:person_uuid>/",
+        SentNotificationListView.as_view(),
+        name="notification-list",
+    ),
+    path(
+        "<uuid:person_uuid>/<uuid:notification_uuid>/",
         MarkNotificationAsReadView.as_view(),
         name="notification-mark-as-read",
     ),

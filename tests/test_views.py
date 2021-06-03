@@ -15,7 +15,7 @@ class SentNotificationListViewTest(APITestCase):
         cls.web_notification = WebNotificationFactory(person=cls.person)
         cls.url = reverse(
             "osis_notification:notification-list",
-            kwargs={"uuid": cls.person.uuid},
+            kwargs={"person_uuid": cls.person.uuid},
         )
 
     def setUp(self):
@@ -31,7 +31,7 @@ class SentNotificationListViewTest(APITestCase):
         response = self.client.get(
             reverse(
                 "osis_notification:notification-list",
-                kwargs={"uuid": PersonFactory().uuid},
+                kwargs={"person_uuid": PersonFactory().uuid},
             )
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -66,7 +66,10 @@ class MarkNotificationAsReadViewTest(APITestCase):
         cls.web_notification = WebNotificationFactory(person=cls.person)
         cls.url = reverse(
             "osis_notification:notification-mark-as-read",
-            kwargs={"uuid": cls.person.uuid, "pk": cls.web_notification.pk},
+            kwargs={
+                "person_uuid": cls.person.uuid,
+                "notification_uuid": cls.web_notification.uuid,
+            },
         )
 
     def setUp(self):
@@ -100,7 +103,10 @@ class MarkNotificationAsReadViewTest(APITestCase):
         response = self.client.patch(
             reverse(
                 "osis_notification:notification-mark-as-read",
-                kwargs={"uuid": person.uuid, "pk": web_notification.pk},
+                kwargs={
+                    "person_uuid": person.uuid,
+                    "notification_uuid": web_notification.uuid,
+                },
             )
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

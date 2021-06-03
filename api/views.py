@@ -23,7 +23,7 @@ class SentNotificationListView(generics.ListAPIView):
     pagination_class = NotificationSetPagination
 
     def get_queryset(self):
-        return super().get_queryset().filter(person__uuid=self.kwargs["uuid"])
+        return super().get_queryset().filter(person__uuid=self.kwargs["person_uuid"])
 
 
 class MarkNotificationAsReadView(generics.UpdateAPIView):
@@ -37,8 +37,8 @@ class MarkNotificationAsReadView(generics.UpdateAPIView):
     def get_object(self):
         return get_object_or_404(
             self.queryset,
-            person__uuid=self.kwargs["uuid"],
-            pk=self.kwargs["pk"],
+            person__uuid=self.kwargs["person_uuid"],
+            uuid=self.kwargs["notification_uuid"],
         )
 
     def update(self, request, *args, **kwargs):
