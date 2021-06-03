@@ -115,3 +115,15 @@ class WebNotificationHandler:
         notification.state = NotificationStates.SENT_STATE.name
         notification.sent_at = now()
         notification.save()
+
+    @staticmethod
+    def toggle_state(notification: WebNotification):
+        """Toggle the notification state between `SENT_STATE` and `READ_STATE`."""
+
+        if notification.state == NotificationStates.READ_STATE.name:
+            notification.state = NotificationStates.SENT_STATE.name
+            notification.read_at = None
+        else:
+            notification.state = NotificationStates.READ_STATE.name
+            notification.read_at = now()
+        notification.save()

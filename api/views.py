@@ -1,13 +1,11 @@
-from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.utils.timezone import now
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
 
 from osis_notification.api.permissions import IsNotificationRecipient
 from osis_notification.api.serializers import WebNotificationSerializer
+from osis_notification.contrib.handlers import WebNotificationHandler
 from osis_notification.models import WebNotification
-from osis_notification.models.enums import NotificationStates
 
 
 class NotificationSetPagination(LimitOffsetPagination):
@@ -42,12 +40,5 @@ class MarkNotificationAsReadView(generics.UpdateAPIView):
         )
 
     def update(self, request, *args, **kwargs):
-        notification = self.get_object()
-        if notification.state == NotificationStates.READ_STATE.name:
-            notification.state = NotificationStates.SENT_STATE.name
-            notification.read_at = None
-        else:
-            notification.state = NotificationStates.READ_STATE.name
-            notification.read_at = now()
-        notification.save()
+        WebNotificationHandler.toggle_state(self.get_object())
         return super().update(request, *args, **kwargs)
