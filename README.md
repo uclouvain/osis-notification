@@ -17,7 +17,7 @@ Requirements
 
 ## Configuring Django
 
-Add `osis_notification` to `INSTALLED_APPS`:
+Add `osis_notification` to `INSTALLED_APPS` and configure the email and web retention days [see this part](#cleaning-notifications) :
 
 ```python
 INSTALLED_APPS = (
@@ -25,6 +25,9 @@ INSTALLED_APPS = (
     'osis_notification',
     ...
 )
+
+EMAIL_NOTIFICATIONS_RETENTION_DAYS = 15
+WEB_NOTIFICATIONS_RETENTION_DAYS = 30
 ```
 
 # Using OSIS Notification
@@ -115,7 +118,7 @@ EmailNotificationHandler.create(email_notification)
 
 This mail notification will automatically be send by the task runner.
 
-## How notifications are sent?
+## Sending notification
 
 `osis_notification` is using Celery tasks to send notifications. Those tasks will call Django command to send both web and email notifications.
 
@@ -128,3 +131,23 @@ call_command("send_web_notifications")
 ```
 
 The commands are calling the `process` function on their respective handlers for each notification that are found in the DB with the "Pending" state.
+
+## Cleaning notifications
+
+To avoid database overflowing, all the sent email notifications and the read web notifications are deleted after a defined retention duration. You will have to define this duration in your Django settings like this :
+
+```python
+EMAIL_NOTIFICATIONS_RETENTION_DAYS = 15
+WEB_NOTIFICATIONS_RETENTION_DAYS = 30
+```
+
+This duration is set in days.
+
+A Celery task will call a Django command responsible for deleting all the notifications that are older than this duration and have been sent or read :
+
+```python
+from django.core.management import call_command
+
+call_command("clean_email_notifications")
+call_command("clean_web_notifications")
+```
