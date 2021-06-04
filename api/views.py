@@ -1,8 +1,10 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
-from osis_notification.api.permissions import IsNotificationRecipient
 from osis_notification.api.serializers import WebNotificationSerializer
+from osis_notification.contrib.handlers import WebNotificationHandler
 from osis_notification.models import WebNotification
 
 
@@ -15,8 +17,28 @@ class SentNotificationListView(generics.ListAPIView):
 
     queryset = WebNotification.objects.sent()
     serializer_class = WebNotificationSerializer
-    permission_classes = (IsNotificationRecipient,)
+    permission_classes = (IsAuthenticated,)
     pagination_class = NotificationSetPagination
 
     def get_queryset(self):
-        return super().get_queryset().filter(person__uuid=self.kwargs["uuid"])
+        return super().get_queryset().filter(person__uuid=self.request.user.person.uuid)
+
+
+class MarkNotificationAsReadView(generics.UpdateAPIView):
+    """Mark a single given notification as read if the notification is sent. If the
+    notification is already mark as sent, it marks it as sent."""
+
+    queryset = WebNotification.objects.sent()
+    serializer_class = WebNotificationSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        return get_object_or_404(
+            self.queryset,
+            person__uuid=self.request.user.person.uuid,
+            uuid=self.kwargs["notification_uuid"],
+        )
+
+    def update(self, request, *args, **kwargs):
+        WebNotificationHandler.toggle_state(self.get_object())
+        return super().update(request, *args, **kwargs)

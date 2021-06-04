@@ -7,8 +7,10 @@ class WebNotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = WebNotification
         fields = [
+            "uuid",
             "state",
             "payload",
             "created_at",
             "sent_at",
+            "read_at",
         ]

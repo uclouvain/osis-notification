@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils.translation import gettext as _
 
@@ -11,6 +12,7 @@ from osis_notification.models.enums import (
 class Notification(models.Model):
     """Base class for a notification"""
 
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     type = models.CharField(
         _("Type"),
         choices=NotificationTypes.choices(),
