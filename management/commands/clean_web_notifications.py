@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         maximum_retention_date = now() - timedelta(
-            days=settings.NOTIFICATIONS_RETENTION_DAYS
+            days=settings.WEB_NOTIFICATIONS_RETENTION_DAYS
         )
         WebNotification.objects.filter(
             state=NotificationStates.READ_STATE.name,

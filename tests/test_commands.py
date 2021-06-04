@@ -65,12 +65,12 @@ class SendNotificationsTest(TestCase):
         )
 
 
-@override_settings(NOTIFICATIONS_RETENTION_DAYS=10)
+@override_settings(WEB_NOTIFICATIONS_RETENTION_DAYS=10)
 class CleanWebNotificationsTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create a notification with read_at field older than defined retention duration
-        read_at = now() - timedelta(days=settings.NOTIFICATIONS_RETENTION_DAYS)
+        read_at = now() - timedelta(days=settings.WEB_NOTIFICATIONS_RETENTION_DAYS)
         old_web_notification = WebNotificationFactory()
         old_web_notification.read_at = read_at + timedelta(days=1)
         old_web_notification.state = NotificationStates.READ_STATE.name
@@ -87,12 +87,12 @@ class CleanWebNotificationsTest(TestCase):
         self.assertEqual(WebNotification.objects.count(), 1)
 
 
-@override_settings(NOTIFICATIONS_RETENTION_DAYS=10)
+@override_settings(EMAIL_NOTIFICATIONS_RETENTION_DAYS=10)
 class CleanEmailNotificationsTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create a notification with read_at field older than defined retention duration
-        sent_at = now() - timedelta(days=settings.NOTIFICATIONS_RETENTION_DAYS)
+        sent_at = now() - timedelta(days=settings.EMAIL_NOTIFICATIONS_RETENTION_DAYS)
         old_email_notification = EmailNotificationFactory(payload="test payload")
         old_email_notification.sent_at = sent_at + timedelta(days=1)
         old_email_notification.state = NotificationStates.SENT_STATE.name
