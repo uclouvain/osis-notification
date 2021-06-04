@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Frontend related
+/node_modules
+/static/osis_notification/osis-notification.common.*
+/static/osis_notification/osis-notification.umd.js*
+/coverage
