@@ -127,3 +127,9 @@ class WebNotificationHandler:
             notification.state = NotificationStates.READ_STATE.name
             notification.read_at = now()
         notification.save()
+
+    @staticmethod
+    def mark_as_read(notification: WebNotification):
+        notification.state = NotificationStates.READ_STATE.name
+        notification.read_at = now()
+        notification.save()
