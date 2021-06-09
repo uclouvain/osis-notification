@@ -23,29 +23,17 @@
  *   see http://www.gnu.org/licenses/.
  *
  */
-
 import Vue from 'vue';
-import VueI18n from 'vue-i18n';
+import NotificationViewer from './NotificationViewer';
+import { i18n } from './i18n';
 
-Vue.use(VueI18n);
-
-const messages = {
-  en: {
-    mark_all_as_read: 'Mark all as read',
-    mark_as_read: 'Mark as read',
-    mark_as_unread: 'Mark as unread',
-    error_mark_as_read: 'An error occurred while marking the notification as read, please try again later.',
-    error_mark_all_as_read: 'An error occurred while marking all the notifications as read, please try again later.',
-  },
-  'fr-be': {
-    mark_all_as_read: 'Tout marquer comme lu',
-    mark_as_read: 'Marquer comme lu',
-    mark_as_unread: 'Marquer comme non-lu',
-    error_mark_as_read: 'Une erreur s\'est produite lors du marquage de la notification comme lue, veuillez réessayer plus tard.',
-    error_mark_all_as_read: 'Une erreur s\'est produite lors du marquage des notifications comme lues, veuillez réessayer plus tard.',
-  },
-};
-export const i18n = new VueI18n({
-  locale: document.documentElement.lang || 'en',
-  messages,
+document.querySelectorAll('#notification-viewer').forEach((elem) => {
+  const props = { ...elem.dataset };
+  if (typeof props.interval !== 'undefined') {
+    props.interval = Number.parseInt(props.interval);
+  }
+  new Vue({
+    render: (h) => h(NotificationViewer, { props }),
+    i18n,
+  }).$mount(elem);
 });
