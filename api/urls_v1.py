@@ -10,12 +10,12 @@ app_name = "osis_notification"
 urlpatterns = [
     path("", SentNotificationListView.as_view(), name="notification-list"),
     path(
-        "mark_all_as_read/",
+        "mark_all_as_read",
         MarkAllNotificationsAsReadView.as_view(),
         name="notification-mark-all-as-read",
     ),
     path(
-        "<uuid:notification_uuid>/",
+        "<uuid:notification_uuid>",
         MarkNotificationAsReadView.as_view(),
         name="notification-mark-as-read",
     ),
