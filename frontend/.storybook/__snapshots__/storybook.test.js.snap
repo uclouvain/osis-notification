@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Global component No Notification 1`] = `
+<ul
+  class="nav navbar-nav"
+>
+  <li
+    class="dropdown notification-viewer"
+  >
+    <a
+      aria-expanded="false"
+      aria-haspopup="true"
+      class="dropdown-toggle"
+      data-toggle="dropdown"
+      role="button"
+    >
+      <div
+        class="notification"
+        data-count="0"
+      />
+    </a>
+     
+    <!---->
+     
+    <!---->
+  </li>
+</ul>
+`;
+
+exports[`Storyshots Global component With Notifications 1`] = `
+<ul
+  class="nav navbar-nav"
+>
+  <li
+    class="dropdown notification-viewer"
+  >
+    <a
+      aria-expanded="false"
+      aria-haspopup="true"
+      class="dropdown-toggle"
+      data-toggle="dropdown"
+      role="button"
+    >
+      <div
+        class="notification"
+        data-count="0"
+      />
+    </a>
+     
+    <!---->
+     
+    <!---->
+  </li>
+</ul>
+`;
