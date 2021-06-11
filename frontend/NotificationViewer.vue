@@ -24,19 +24,25 @@
   -
   -->
 <template>
-  <li class="dropdown notification-viewer">
+  <li
+      id="notification-viewer"
+      class="dropdown"
+  >
     <a
         class="dropdown-toggle"
         data-toggle="dropdown"
         role="button"
         aria-haspopup="true"
         aria-expanded="false"
+        @click="animationEnabled = false"
     >
       <div
           class="bell"
           :data-count="unreadNotificationsCount"
-          :class="{'show-count': unreadNotificationsCount, 'notify': unreadNotificationsCount}"
-      />
+          :class="{'show-count': unreadNotificationsCount, 'notify': (unreadNotificationsCount && animationEnabled)}"
+      >
+        <span class="fas fa-bell" />
+      </div>
     </a>
     <ul
         v-show="notifications.length"
@@ -55,31 +61,15 @@
           role="separator"
           class="divider"
       />
-      <li
+      <Notification
           v-for="notification in notifications"
           :key="notification.uuid"
-          class="notification-dropdown-item"
-          v-bind="notification"
-      >
-        <a>
-          <div class="radio">
-            <input
-                :id="notification.uuid"
-                v-model="notification.state"
-                :value="'SENT_STATE'"
-                type="radio"
-                data-toggle="tooltip"
-                data-placement="top"
-                :title="notification.state === 'SENT_STATE' ? $t('mark_as_read') : $t('mark_as_unread')"
-                @click="markAsRead(notification)"
-            >
-            <span class="label label-primary">{{ notification.sent_at }}</span>
-            <!-- Disable the vue/no-v-html warning -->
-            <!-- eslint-disable-next-line -->
-            <span class="notification-text" :class="{ 'font-bold': notification.state === 'SENT_STATE' }" v-html="notification.payload" />
-          </div>
-        </a>
-      </li>
+          :uuid="notification.uuid"
+          :state="notification.state"
+          :sent-at="notification.sent_at"
+          :payload="notification.payload"
+          @mark="markAsRead"
+      />
     </ul>
     <div
         v-if="error"
@@ -92,13 +82,15 @@
 </template>
 
 <script>
+import Notification from './components/Notification';
 
 export default {
   name: 'NotificationViewer',
+  components: { Notification },
   props: {
     url: {
       type: String,
-      default: '',
+      required: true,
     },
     interval: {
       type: Number,
@@ -108,6 +100,7 @@ export default {
   data() {
     return {
       notifications: [],
+      animationEnabled: false,
       error: '',
     };
   },
@@ -122,54 +115,49 @@ export default {
     // This next line let the dropdown menu open after clicking inside it. See the bootstrap source code here:
     // https://github.com/twbs/bootstrap/blob/0b9c4a4007c44201dce9a6cc1a38407005c26c86/js/dropdown.js#L160
     jQuery(document).on('click.bs.dropdown.data-api', '.notification-dropdown', e => e.stopPropagation());
-    // activate the tooltips
-    jQuery(() => jQuery('[data-toggle="tooltip"]').tooltip());
   },
   methods: {
     fetchNotifications: async function () {
       try {
         if (this.url) {
           const response = await fetch(this.url);
-          let newNotifications = await response.json();
+          const newNotifications = await response.json();
+          if (newNotifications.count) {
+            this.animationEnabled = true;
+          }
           this.notifications = newNotifications.results;
         }
       } catch (error) {
-        this.error = this.$t('error_fetch_notifications').concat(' (', error.statusText, ')');
+        this.error = `${this.$t('error_fetch_notifications')} ( ${error.statusText} )`;
       }
     },
-    markAsRead: async function (notification) {
+    markAsRead: async function (uuid) {
       try {
-        const response = await fetch(this.url.concat(notification.uuid), {
+        const response = await fetch(`${this.url}${uuid}`, {
           method: 'PATCH',
           headers: {'X-CSRFToken': this.getCookie('csrftoken')},
         });
         if (response.status === 200) {
-          const notificationIndex = this.notifications.indexOf(notification);
-          let newNotification = await response.json();
+          const notificationIndex = this.notifications.findIndex((notification) => notification.uuid === uuid);
+          const newNotification = await response.json();
           this.$set(this.notifications, notificationIndex, newNotification);
-          // Change the bootstrap input radio tooltip
-          jQuery('#'.concat(notification.uuid))
-              .attr('data-original-title', newNotification.state === 'SENT_STATE' ? this.$t('mark_as_read') : this.$t('mark_as_unread'))
-              .tooltip('show');
         }
       } catch (error) {
-        this.error = this.$t('error_mark_as_read').concat(' (', error.statusText, ')');
+        this.error = `${this.$t('error_mark_as_read')} ( ${error.statusText} )`;
       }
     },
     markAllAsRead: async function () {
       try {
-        const response = await fetch(this.url.concat('mark_all_as_read'), {
+        const response = await fetch(`${this.url}mark_all_as_read`, {
           method: 'PUT',
           headers: {'X-CSRFToken': this.getCookie('csrftoken')},
         });
-        let notifications = await response.json();
+        const notifications = await response.json();
         if (response.status === 200 && notifications.length > 0) {
           this.notifications = notifications;
-          // Change ALL the bootstrap input radio tooltips
-          jQuery('[data-toggle="tooltip"]').attr('data-original-title', this.$t('mark_as_unread'));
         }
       } catch (error) {
-        this.error = this.$t('error_mark_all_as_read').concat(' (', error.statusText, ')');
+        this.error = `${this.$t('error_mark_all_as_read')} ( ${error.statusText} )`;
       }
     },
     /**
@@ -197,37 +185,14 @@ export default {
 </script>
 
 <style lang="scss">
-.notification-viewer {
+#notification-viewer {
   .alert.alert-warning {
     margin-top: 20px;
   }
 
   .notification-dropdown {
-    width: 70vh;
+    min-width: 70vw;
     padding: 15px;
-
-    .notification-dropdown-item {
-      .label {
-        margin-left: 30px;
-      }
-
-      input[type=radio] {
-        cursor: pointer;
-        margin-left: -5px;
-      }
-
-      .notification-text {
-        display: block;
-        text-align: justify;
-        white-space: initial;
-        margin-top: 10px;
-        margin-left: 30px;
-      }
-    }
-
-    .font-bold {
-      font-weight: bold;
-    }
   }
 }
 
@@ -242,14 +207,8 @@ export default {
     color: #777;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
-  &::before {
-    display: block;
-    content: "\f0f3";
-    font-family: "Font Awesome 5 Free";
-    transform-origin: top center;
-  }
-  &::after {
-    font-family: Arial;
+  &::after {  // notification count
+    font-family: Arial sans-serif;
     font-size: 0.8em;
     font-weight: 700;
     position: absolute;
@@ -262,7 +221,6 @@ export default {
     background: #db3434;
     opacity: 0;
     content: attr(data-count);
-    opacity: 0;
     transform: scale(0.5);
     transition: transform, opacity;
     transition-duration: 0.3s;
@@ -270,7 +228,7 @@ export default {
     color: #fff;
     z-index: 2;
   }
-  &.notify::before {
+  &.notify span {
     animation: ring 1.5s ease;
     animation-iteration-count: infinite;
   }
