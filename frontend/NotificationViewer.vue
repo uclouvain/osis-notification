@@ -33,19 +33,19 @@
         aria-expanded="false"
     >
       <div
-          ref="notification"
-          class="notification"
-          :data-count="notReadNotificationsCount"
+          class="bell"
+          :data-count="unreadNotificationsCount"
+          :class="{'show-count': unreadNotificationsCount, 'notify': unreadNotificationsCount}"
       />
     </a>
     <ul
-        v-show="notifications.length > 0"
+        v-show="notifications.length"
         class="dropdown-menu notification-dropdown"
     >
       <li>
         <a
             class="btn"
-            :class="{ disabled: notReadNotificationsCount === 0 }"
+            :class="{ disabled: !unreadNotificationsCount }"
             @click="markAllAsRead"
         >
           {{ $t('mark_all_as_read') }}
@@ -112,34 +112,30 @@ export default {
     };
   },
   computed: {
-    notReadNotificationsCount: function () {
+    unreadNotificationsCount: function () {
       return this.notifications.filter(notification => notification.state === 'SENT_STATE').length;
     },
   },
-  async created() {
+  async mounted() {
     await this.fetchNotifications();
     this.timer = setInterval(this.fetchNotifications, this.interval * 1000);
-  },
-  mounted() {
     // This next line let the dropdown menu open after clicking inside it. See the bootstrap source code here:
     // https://github.com/twbs/bootstrap/blob/0b9c4a4007c44201dce9a6cc1a38407005c26c86/js/dropdown.js#L160
     jQuery(document).on('click.bs.dropdown.data-api', '.notification-dropdown', e => e.stopPropagation());
     // activate the tooltips
     jQuery(() => jQuery('[data-toggle="tooltip"]').tooltip());
-    this.updateBellNotificationCounter();
   },
   methods: {
     fetchNotifications: async function () {
-      if (this.url) {
-        const response = await fetch(this.url);
-        let newNotifications = await response.json();
-        let newSentNotificationsCount = newNotifications.results.filter(notification => notification.state === 'SENT_STATE').length
-        if (newSentNotificationsCount > 0) {
-          this.ringTheBell();
+      try {
+        if (this.url) {
+          const response = await fetch(this.url);
+          let newNotifications = await response.json();
+          this.notifications = newNotifications.results;
         }
-        this.notifications = newNotifications.results;
+      } catch (error) {
+        this.error = this.$t('error_fetch_notifications').concat(' (', error.statusText, ')');
       }
-      this.updateBellNotificationCounter();
     },
     markAsRead: async function (notification) {
       try {
@@ -151,15 +147,10 @@ export default {
           const notificationIndex = this.notifications.indexOf(notification);
           let newNotification = await response.json();
           this.$set(this.notifications, notificationIndex, newNotification);
-          if (this.notReadNotificationsCount === 0) {
-            this.stopRingingTheBell();
-          } else {
-            this.ringTheBell();
-          }
-          this.updateBellNotificationCounter();
           // Change the bootstrap input radio tooltip
           jQuery('#'.concat(notification.uuid))
-              .attr('data-original-title', newNotification.state === 'SENT_STATE' ? this.$t('mark_as_read') : this.$t('mark_as_unread'));
+              .attr('data-original-title', newNotification.state === 'SENT_STATE' ? this.$t('mark_as_read') : this.$t('mark_as_unread'))
+              .tooltip('show');
         }
       } catch (error) {
         this.error = this.$t('error_mark_as_read').concat(' (', error.statusText, ')');
@@ -174,12 +165,6 @@ export default {
         let notifications = await response.json();
         if (response.status === 200 && notifications.length > 0) {
           this.notifications = notifications;
-          if (this.notReadNotificationsCount === 0) {
-            this.stopRingingTheBell();
-          } else {
-            this.ringTheBell();
-          }
-          this.updateBellNotificationCounter();
           // Change ALL the bootstrap input radio tooltips
           jQuery('[data-toggle="tooltip"]').attr('data-original-title', this.$t('mark_as_unread'));
         }
@@ -188,31 +173,10 @@ export default {
       }
     },
     /**
-     * Ringing the bell is just about adding and removing the css notify class
-     * See code from https://codepen.io/ryanmorr/pen/RPZZjd
-     */
-    ringTheBell: function () {
-      if ('notification' in this.$refs && !!this.$refs.notification) {
-        this.$refs.notification.classList.add('notify');
-      }
-    },
-    stopRingingTheBell: function () {
-      if ('notification' in this.$refs && !!this.$refs.notification) {
-        this.$refs.notification.classList.remove('notify');
-      }
-    },
-    updateBellNotificationCounter: function () {
-      let notification = this.$refs.notification;
-      if (!!notification && this.notReadNotificationsCount === 0) {
-        notification.classList.remove('show-count');
-      } else if (!!notification && this.notReadNotificationsCount !== 0) {
-        notification.classList.add('show-count');
-      }
-    },
-    /**
      * Get the given cookie from it's name. We use it to get the csrftoken.
      * See code from https://docs.djangoproject.com/en/3.2/ref/csrf/#acquiring-the-token-if-csrf-use-sessions-and-csrf-cookie-httponly-are-false
      */
+    // TODO check les conditions de getCookie
     getCookie: function (name) {
       let cookieValue = null;
       if (document.cookie && document.cookie !== '') {
@@ -269,7 +233,7 @@ export default {
 
 //-------------------------------------------------
 // Code from https://codepen.io/ryanmorr/pen/RPZZjd
-.notification {
+.bell {
   display: inline-block;
   position: relative;
 

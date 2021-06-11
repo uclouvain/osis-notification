@@ -36,6 +36,7 @@ const messages = {
     mark_as_unread: 'Mark as unread',
     error_mark_as_read: 'An error occurred while marking the notification as read, please try again later.',
     error_mark_all_as_read: 'An error occurred while marking all the notifications as read, please try again later.',
+    error_fetch_notifications: 'An error occurred while fetching notifications, please try again later.',
   },
   'fr-be': {
     mark_all_as_read: 'Tout marquer comme lu',
@@ -43,6 +44,7 @@ const messages = {
     mark_as_unread: 'Marquer comme non-lu',
     error_mark_as_read: 'Une erreur s\'est produite lors du marquage de la notification comme lue, veuillez réessayer plus tard.',
     error_mark_all_as_read: 'Une erreur s\'est produite lors du marquage des notifications comme lues, veuillez réessayer plus tard.',
+    error_fetch_notifications: 'Une erreur s\'est produite lors de la récupération des notifications, veuillez réessayer plus tard.',
   },
 };
 export const i18n = new VueI18n({
