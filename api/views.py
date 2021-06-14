@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import generics, views
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.pagination import LimitOffsetPagination
@@ -15,6 +17,7 @@ class NotificationSetPagination(LimitOffsetPagination):
     default_limit = 15
 
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class SentNotificationListView(generics.ListAPIView):
     """Return all sent notifications associated to a specific user."""
 
