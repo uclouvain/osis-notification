@@ -83,6 +83,7 @@
 
 <script>
 import Notification from './components/Notification';
+import { getCookie } from './utils';
 
 export default {
   name: 'NotificationViewer',
@@ -135,7 +136,7 @@ export default {
       try {
         const response = await fetch(`${this.url}${uuid}`, {
           method: 'PATCH',
-          headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+          headers: {'X-CSRFToken': getCookie('csrftoken')},
         });
         if (response.status === 200) {
           const notificationIndex = this.notifications.findIndex((notification) => notification.uuid === uuid);
@@ -150,7 +151,7 @@ export default {
       try {
         const response = await fetch(`${this.url}mark_all_as_read`, {
           method: 'PUT',
-          headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+          headers: {'X-CSRFToken': getCookie('csrftoken')},
         });
         const notifications = await response.json();
         if (response.status === 200 && notifications.length > 0) {
@@ -159,26 +160,6 @@ export default {
       } catch (error) {
         this.error = `${this.$t('error_mark_all_as_read')} ( ${error.statusText} )`;
       }
-    },
-    /**
-     * Get the given cookie from it's name. We use it to get the csrftoken.
-     * See code from https://docs.djangoproject.com/en/3.2/ref/csrf/#acquiring-the-token-if-csrf-use-sessions-and-csrf-cookie-httponly-are-false
-     */
-    // TODO check les conditions de getCookie
-    getCookie: function (name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          // Does this cookie string begin with the name we want?
-          if (cookie.substring(0, name.length + 1) === (name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
     },
   },
 };
