@@ -66,6 +66,22 @@ export const withNotifications = () => {
   };
 };
 
+export const withErrors = () => {
+  fetchMock.restore()
+    .get('/', mockNotifications)
+    .put('/mark_all_as_read', {throws: { statusText: 'Network error'}})
+    .patch('*', {throws: { statusText: 'Network error'}});
+
+  return {
+    components: { NotificationViewer },
+    template: `
+      <ul class="nav navbar-nav">
+        <NotificationViewer url="/" :interval="10" />
+      </ul>
+    `,
+  };
+};
+
 export default {
   title: 'Global component',
 };
