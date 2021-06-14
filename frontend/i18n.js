@@ -31,20 +31,28 @@ Vue.use(VueI18n);
 
 const messages = {
   en: {
-    mark_all_as_read: 'Mark all as read',
-    mark_as_read: 'Mark as read',
-    mark_as_unread: 'Mark as unread',
-    error_mark_as_read: 'An error occurred while marking the notification as read, please try again later.',
-    error_mark_all_as_read: 'An error occurred while marking all the notifications as read, please try again later.',
-    error_fetch_notifications: 'An error occurred while fetching notifications, please try again later.',
+    notification_viewer: {
+      mark_all_as_read: 'Mark all as read',
+      error_mark_as_read: 'An error occurred while marking the notification as read, please try again later.',
+      error_mark_all_as_read: 'An error occurred while marking all the notifications as read, please try again later.',
+      error_fetch_notifications: 'An error occurred while fetching notifications, please try again later.',
+    },
+    notification: {
+      mark_as_read: 'Mark as read',
+      mark_as_unread: 'Mark as unread',
+    },
   },
   'fr-be': {
-    mark_all_as_read: 'Tout marquer comme lu',
-    mark_as_read: 'Marquer comme lu',
-    mark_as_unread: 'Marquer comme non-lu',
-    error_mark_as_read: 'Une erreur s\'est produite lors du marquage de la notification comme lue, veuillez réessayer plus tard.',
-    error_mark_all_as_read: 'Une erreur s\'est produite lors du marquage des notifications comme lues, veuillez réessayer plus tard.',
-    error_fetch_notifications: 'Une erreur s\'est produite lors de la récupération des notifications, veuillez réessayer plus tard.',
+    notification_viewer: {
+      mark_all_as_read: 'Tout marquer comme lu',
+      error_mark_as_read: 'Une erreur s\'est produite lors du marquage de la notification comme lue, veuillez réessayer plus tard.',
+      error_mark_all_as_read: 'Une erreur s\'est produite lors du marquage des notifications comme lues, veuillez réessayer plus tard.',
+      error_fetch_notifications: 'Une erreur s\'est produite lors de la récupération des notifications, veuillez réessayer plus tard.',
+    },
+    notification: {
+      mark_as_read: 'Marquer comme lu',
+      mark_as_unread: 'Marquer comme non-lu',
+    },
   },
 };
 export const i18n = new VueI18n({

@@ -54,7 +54,7 @@
             :class="{ disabled: !unreadNotificationsCount }"
             @click="markAllAsRead"
         >
-          {{ $t('mark_all_as_read') }}
+          {{ $t('notification_viewer.mark_all_as_read') }}
         </a>
       </li>
       <li
@@ -129,7 +129,7 @@ export default {
           this.notifications = newNotifications.results;
         }
       } catch (error) {
-        this.error = `${this.$t('error_fetch_notifications')} ( ${error.statusText} )`;
+        this.error = `${this.$t('notification_viewer.error_fetch_notifications')} ( ${error.statusText} )`;
       }
     },
     markAsRead: async function (uuid) {
@@ -144,7 +144,7 @@ export default {
           this.$set(this.notifications, notificationIndex, newNotification);
         }
       } catch (error) {
-        this.error = `${this.$t('error_mark_as_read')} ( ${error.statusText} )`;
+        this.error = `${this.$t('notification_viewer.error_mark_as_read')} ( ${error.statusText} )`;
       }
     },
     markAllAsRead: async function () {
@@ -158,7 +158,7 @@ export default {
           this.notifications = notifications;
         }
       } catch (error) {
-        this.error = `${this.$t('error_mark_all_as_read')} ( ${error.statusText} )`;
+        this.error = `${this.$t('notification_viewer.error_mark_all_as_read')} ( ${error.statusText} )`;
       }
     },
   },

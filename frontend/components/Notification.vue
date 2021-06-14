@@ -31,7 +31,7 @@
         type="radio"
         data-toggle="tooltip"
         data-placement="top"
-        :data-original-title="isSent ? $t('mark_as_read') : $t('mark_as_unread')"
+        :data-original-title="isSent ? $t('notification.mark_as_read') : $t('notification.mark_as_unread')"
         @click="$emit('mark', uuid)"
     >
     <span class="label label-primary">{{ sentAt }}</span>
