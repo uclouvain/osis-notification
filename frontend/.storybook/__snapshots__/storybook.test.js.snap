@@ -5,7 +5,8 @@ exports[`Storyshots Global component No Notification 1`] = `
   class="nav navbar-nav"
 >
   <li
-    class="dropdown notification-viewer"
+    class="dropdown"
+    id="notification-viewer"
   >
     <a
       aria-expanded="false"
@@ -15,12 +16,86 @@ exports[`Storyshots Global component No Notification 1`] = `
       role="button"
     >
       <div
-        class="notification"
+        class="bell"
         data-count="0"
-      />
+      >
+        <span
+          class="fas fa-bell"
+        />
+      </div>
     </a>
      
+    <ul
+      class="dropdown-menu notification-dropdown"
+      style="display: none;"
+    >
+      <li>
+        <a
+          class="btn disabled"
+        >
+          
+        Mark all as read
+      
+        </a>
+      </li>
+       
+      <li
+        class="divider"
+        role="separator"
+      />
+       
+    </ul>
+     
     <!---->
+  </li>
+</ul>
+`;
+
+exports[`Storyshots Global component With Errors 1`] = `
+<ul
+  class="nav navbar-nav"
+>
+  <li
+    class="dropdown"
+    id="notification-viewer"
+  >
+    <a
+      aria-expanded="false"
+      aria-haspopup="true"
+      class="dropdown-toggle"
+      data-toggle="dropdown"
+      role="button"
+    >
+      <div
+        class="bell"
+        data-count="0"
+      >
+        <span
+          class="fas fa-bell"
+        />
+      </div>
+    </a>
+     
+    <ul
+      class="dropdown-menu notification-dropdown"
+      style="display: none;"
+    >
+      <li>
+        <a
+          class="btn disabled"
+        >
+          
+        Mark all as read
+      
+        </a>
+      </li>
+       
+      <li
+        class="divider"
+        role="separator"
+      />
+       
+    </ul>
      
     <!---->
   </li>
@@ -32,7 +107,8 @@ exports[`Storyshots Global component With Notifications 1`] = `
   class="nav navbar-nav"
 >
   <li
-    class="dropdown notification-viewer"
+    class="dropdown"
+    id="notification-viewer"
   >
     <a
       aria-expanded="false"
@@ -42,12 +118,35 @@ exports[`Storyshots Global component With Notifications 1`] = `
       role="button"
     >
       <div
-        class="notification"
+        class="bell"
         data-count="0"
-      />
+      >
+        <span
+          class="fas fa-bell"
+        />
+      </div>
     </a>
      
-    <!---->
+    <ul
+      class="dropdown-menu notification-dropdown"
+      style="display: none;"
+    >
+      <li>
+        <a
+          class="btn disabled"
+        >
+          
+        Mark all as read
+      
+        </a>
+      </li>
+       
+      <li
+        class="divider"
+        role="separator"
+      />
+       
+    </ul>
      
     <!---->
   </li>
