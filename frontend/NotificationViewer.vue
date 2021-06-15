@@ -68,7 +68,7 @@
           :state="notification.state"
           :sent-at="notification.sent_at"
           :payload="notification.payload"
-          @mark="markAsRead"
+          @toggle="toggleState"
       />
     </ul>
     <div
@@ -132,7 +132,7 @@ export default {
         this.error = `${this.$t('notification_viewer.error_fetch_notifications')} ( ${error.statusText} )`;
       }
     },
-    markAsRead: async function (uuid) {
+    toggleState: async function (uuid) {
       try {
         const response = await fetch(`${this.url}${uuid}`, {
           method: 'PATCH',

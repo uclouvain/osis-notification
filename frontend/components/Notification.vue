@@ -32,7 +32,7 @@
         data-toggle="tooltip"
         data-placement="top"
         :data-original-title="isSent ? $t('notification.mark_as_read') : $t('notification.mark_as_unread')"
-        @click="$emit('mark', uuid)"
+        @click.prevent="$emit('toggle', uuid)"
     >
     <span class="label label-primary">{{ sentAt }}</span>
     <!-- Disable the vue/no-v-html warning -->
@@ -70,7 +70,7 @@ export default {
   },
   mounted() {
     // activate the tooltips
-    jQuery(() => jQuery('[data-toggle="tooltip"]').tooltip());
+    jQuery('[data-toggle="tooltip"]').tooltip();
   },
   updated() {
     // Show the bootstrap input radio tooltip

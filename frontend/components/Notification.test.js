@@ -43,27 +43,49 @@ const notificationReadData = {
   readAt: Date.now().toString(),
   payload: 'This is a test payload with a READ_STATE',
 }
-window.jQuery = jest.fn(() => ({
-  tooltip: () => {},
-}));
 
-it('should mount', () => {
-  const wrapper = mount(Notification, {
-    propsData: {
-      ...notificationSentData,
-    },
-    mocks: {
-      jQuery,
-      $t: k => k,
-    },
+describe('component lifecycle', () => {
+  const tooltip = jest.fn();
+  window.jQuery = jest.fn(() => ({
+    tooltip,
+  }));
+
+  it('should mount', () => {
+    const wrapper = mount(Notification, {
+      propsData: {
+        ...notificationSentData,
+      },
+      mocks: {
+        jQuery,
+        $t: k => k,
+      },
+    });
+    expect(wrapper.text()).toContain(notificationSentData['payload']);
+    expect(wrapper.text()).toContain(notificationSentData['sentAt']);
+    expect(window.jQuery).toHaveBeenCalled();
   });
-  expect(wrapper.text()).toContain(notificationSentData['payload']);
-  expect(wrapper.text()).toContain(notificationSentData['sentAt']);
-  wrapper.vm.$nextTick();
-  expect(window.jQuery).toHaveBeenCalled();
+
+  it('should update', async () => {
+    const wrapper = mount(Notification, {
+      propsData: {
+        ...notificationSentData,
+      },
+      mocks: {
+        jQuery,
+        $t: k => k,
+      },
+    });
+    tooltip.mockClear();
+    expect(tooltip).not.toHaveBeenCalled();
+    // change this and trigger an update
+    wrapper.setProps({...notificationReadData});
+    await wrapper.vm.$nextTick();
+    expect(tooltip).toHaveBeenCalled();
+  });
+
 });
 
-it('should update', async () => {
+it('should trigger toggle', async () => {
   const wrapper = mount(Notification, {
     propsData: {
       ...notificationSentData,
@@ -73,8 +95,9 @@ it('should update', async () => {
       $t: k => k,
     },
   });
-  await wrapper.vm.$forceUpdate();
-  expect(window.jQuery).toHaveBeenCalled();
+  expect(wrapper.emitted('toggle')).toBeFalsy();
+  await wrapper.find('input').trigger('click');
+  expect(wrapper.emitted('toggle')).toBeTruthy();
 });
 
 it('should have correct computed values', () => {
