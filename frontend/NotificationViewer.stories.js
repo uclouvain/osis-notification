@@ -30,11 +30,19 @@ const mockNotifications = {
    ],
 };
 
+if (process.env.NODE_ENV === 'test') {
+  // Mock jQuery for snapshots tests
+  window.jQuery = jest.fn(() => ({
+    on: () => {},
+  }));
+}
+
 export const noNotification = () => {
+  fetchMock.restore().get('/', {count: 0, results: []});
   return {
     components: { NotificationViewer },
     template: `<ul class="nav navbar-nav">
-                 <NotificationViewer />
+                 <NotificationViewer url="/" />
                </ul>`,
   };
 };
