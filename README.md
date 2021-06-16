@@ -151,3 +151,30 @@ from django.core.management import call_command
 call_command("clean_email_notifications")
 call_command("clean_web_notifications")
 ```
+
+
+# Integrate the front notification component
+
+Make the dependencies available:
+```html
+<link rel="stylesheet" href="https://unpkg.com/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.5.0/css/all.min.css">
+<script type="text/javascript" src="https://unpkg.com/jquery"></script>
+<script type="text/javascript" src="https://unpkg.com/bootstrap@3.3.7/dist/js/bootstrap.js"></script>
+
+<link href="{% static 'osis_notification/osis-notification.css' %}" rel="stylesheet"/>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/vue-i18n@8"></script>
+
+<!-- This line must go at the end of the file -->
+<script type="text/javascript" src="{% static 'osis_notification/osis-notification.umd.min.js' %}"></script>
+
+```
+
+Then you can integrate the component:
+```html
+<div id="notification-viewer" data-url="{% url 'osis_notification:notification-list' %}" data-interval="300"></div>
+```
+
+ - `data-url` : API endpoint that returns all the notifications.
+ - `data-interval` : The interval, in second, to fetch the notifications from the server (default to 300).

@@ -1,5 +1,8 @@
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import generics, views
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -14,6 +17,7 @@ class NotificationSetPagination(LimitOffsetPagination):
     default_limit = 15
 
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class SentNotificationListView(generics.ListAPIView):
     """Return all sent notifications associated to a specific user."""
 
@@ -21,6 +25,7 @@ class SentNotificationListView(generics.ListAPIView):
     serializer_class = WebNotificationSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = NotificationSetPagination
+    authentication_classes = (SessionAuthentication, )
 
     def get_queryset(self):
         return super().get_queryset().filter(person__uuid=self.request.user.person.uuid)
@@ -33,6 +38,7 @@ class MarkNotificationAsReadView(generics.UpdateAPIView):
     queryset = WebNotification.objects.sent()
     serializer_class = WebNotificationSerializer
     permission_classes = (IsAuthenticated,)
+    authentication_classes = (SessionAuthentication, )
 
     def get_object(self):
         return get_object_or_404(
@@ -52,6 +58,7 @@ class MarkAllNotificationsAsReadView(views.APIView):
     queryset = WebNotification.objects.sent()
     serializer_class = WebNotificationSerializer
     permission_classes = (IsAuthenticated,)
+    authentication_classes = (SessionAuthentication, )
 
     def get_queryset(self):
         return self.queryset.filter(
