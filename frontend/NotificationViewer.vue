@@ -140,6 +140,8 @@ export default {
           const notificationIndex = this.notifications.findIndex((notification) => notification.uuid === uuid);
           const newNotification = await response.json();
           this.$set(this.notifications, notificationIndex, newNotification);
+        } else {
+          this.error = `${this.$t('notification_viewer.error_mark_as_read')}`;
         }
       } catch (error) {
         this.error = `${this.$t('notification_viewer.error_mark_as_read')} ( ${error.statusText} )`;
@@ -154,6 +156,8 @@ export default {
         const notifications = await response.json();
         if (response.status === 200 && notifications.length > 0) {
           this.notifications = notifications;
+        } else {
+          this.error = `${this.$t('notification_viewer.error_mark_all_as_read')}`;
         }
       } catch (error) {
         this.error = `${this.$t('notification_viewer.error_mark_all_as_read')} ( ${error.statusText} )`;

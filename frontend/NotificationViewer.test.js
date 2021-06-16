@@ -131,6 +131,13 @@ describe('toggle notification state', () => {
     await Vue.nextTick(); // wait for re-rendering
     expect(wrapper.text()).toContain('notification_viewer.error_mark_as_read');
   });
+  it('should display an error if fetching notifications does not return 200', async () => {
+    fetchMock.patch('*', {status: 404}, {overwriteRoutes: true});
+    await wrapper.vm.toggleState(mockSentNotifications.results[0].uuid);
+    await Vue.nextTick(); // wait for loading
+    await Vue.nextTick(); // wait for re-rendering
+    expect(wrapper.text()).toContain('notification_viewer.error_mark_as_read');
+  });
 });
 
 describe('mark all notifications as read', () => {
@@ -149,8 +156,15 @@ describe('mark all notifications as read', () => {
     expect(wrapper.vm.notifications[0].state).toBe('READ_STATE');
     expect(wrapper.vm.notifications[0].read_at).not.toBe(null);
   });
-  it('should display an error if fetching notifications fail', async () => {
+  it('should display an error if marking notifications as read fail', async () => {
     fetchMock.put('/mark_all_as_read', {throws: 'This is an error'}, {overwriteRoutes: true});
+    await wrapper.vm.markAllAsRead();
+    await Vue.nextTick(); // wait for loading
+    await Vue.nextTick(); // wait for re-rendering
+    expect(wrapper.text()).toContain('notification_viewer.error_mark_all_as_read');
+  });
+  it('should display an error if fetching notifications does not return 200', async () => {
+    fetchMock.put('/mark_all_as_read', {data: null, status: 404}, {overwriteRoutes: true});
     await wrapper.vm.markAllAsRead();
     await Vue.nextTick(); // wait for loading
     await Vue.nextTick(); // wait for re-rendering
