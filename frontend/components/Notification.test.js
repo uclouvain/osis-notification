@@ -62,7 +62,7 @@ describe('component lifecycle', () => {
     });
     expect(wrapper.text()).toContain(notificationSentData['payload']);
     expect(wrapper.text()).toContain(notificationSentData['sentAt']);
-    expect(window.jQuery).toHaveBeenCalled();
+    expect(tooltip).toHaveBeenCalled();
   });
 
   it('should update', async () => {
@@ -81,6 +81,8 @@ describe('component lifecycle', () => {
     wrapper.setProps({...notificationReadData});
     await wrapper.vm.$nextTick();
     expect(tooltip).toHaveBeenCalled();
+    expect(wrapper.text()).toContain(notificationReadData['payload']);
+    expect(wrapper.text()).toContain(notificationReadData['sentAt']);
   });
 
 });
@@ -98,6 +100,56 @@ it('should trigger toggle', async () => {
   expect(wrapper.emitted('toggle')).toBeFalsy();
   await wrapper.find('input').trigger('click');
   expect(wrapper.emitted('toggle')).toBeTruthy();
+});
+
+describe('notification display', () => {
+  it('changes when sent state', async () => {
+    const wrapper = mount(Notification, {
+      propsData: {
+        ...notificationSentData,
+      },
+      mocks: {
+        jQuery,
+        $t: k => k,
+      },
+    });
+
+    // input must be checked
+    const input = wrapper.find('input');
+    expect(input.exists()).toBe(true);
+    expect(input.element.checked).toBeTruthy();
+    // text must be bold
+    const textDiv = wrapper.find('div.notification-text');
+    expect(textDiv.exists()).toBe(true);
+    expect(textDiv.element.classList).toContain('font-bold');
+    // input tooltip should call for mark as read action
+    input.trigger("mouseover");
+    expect(input.element.getAttribute('data-original-title')).toBe('notification.mark_as_read');
+  });
+
+  it('changes when read state', async () => {
+    const wrapper = mount(Notification, {
+      propsData: {
+        ...notificationReadData,
+      },
+      mocks: {
+        jQuery,
+        $t: k => k,
+      },
+    });
+
+    // input must not be checked
+    const input = wrapper.find('input');
+    expect(input.exists()).toBe(true);
+    expect(input.element.checked).toBeFalsy();
+    // text must not be bold
+    const textDiv = wrapper.find('div.notification-text');
+    expect(textDiv.exists()).toBe(true);
+    expect(textDiv.element.classList).not.toContain('font-bold');
+    // input tooltip should call for mark as unread action
+    input.trigger("mouseover");
+    expect(input.element.getAttribute('data-original-title')).toBe('notification.mark_as_unread');
+  });
 });
 
 it('should have correct computed values', () => {
