@@ -120,14 +120,12 @@ export default {
   methods: {
     fetchNotifications: async function () {
       try {
-        if (this.url) {
-          const response = await fetch(this.url);
-          const newNotifications = await response.json();
-          if (newNotifications.count) {
-            this.animationEnabled = true;
-          }
-          this.notifications = newNotifications.results;
+        const response = await fetch(this.url);
+        const newNotifications = await response.json();
+        if (newNotifications.count) {
+          this.animationEnabled = true;
         }
+        this.notifications = newNotifications.results;
       } catch (error) {
         this.error = `${this.$t('notification_viewer.error_fetch_notifications')} ( ${error.statusText} )`;
       }
