@@ -58,6 +58,19 @@
         </a>
       </li>
       <li
+          v-if="error"
+          role="separator"
+          class="divider"
+      />
+      <li v-if="error">
+        <div
+            class="alert alert-warning"
+            role="alert"
+        >
+          {{ error }}
+        </div>
+      </li>
+      <li
           role="separator"
           class="divider"
       />
@@ -71,13 +84,6 @@
           @toggle="toggleState"
       />
     </ul>
-    <div
-        v-if="error"
-        class="alert alert-warning"
-        role="alert"
-    >
-      {{ error }}
-    </div>
   </li>
 </template>
 

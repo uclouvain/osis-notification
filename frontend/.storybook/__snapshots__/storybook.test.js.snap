@@ -39,14 +39,16 @@ exports[`Storyshots Global component No Notification 1`] = `
         </a>
       </li>
        
+      <!---->
+       
+      <!---->
+       
       <li
         class="divider"
         role="separator"
       />
        
     </ul>
-     
-    <!---->
   </li>
 </ul>
 `;
@@ -90,14 +92,16 @@ exports[`Storyshots Global component With Errors 1`] = `
         </a>
       </li>
        
+      <!---->
+       
+      <!---->
+       
       <li
         class="divider"
         role="separator"
       />
        
     </ul>
-     
-    <!---->
   </li>
 </ul>
 `;
@@ -141,14 +145,16 @@ exports[`Storyshots Global component With Notifications 1`] = `
         </a>
       </li>
        
+      <!---->
+       
+      <!---->
+       
       <li
         class="divider"
         role="separator"
       />
        
     </ul>
-     
-    <!---->
   </li>
 </ul>
 `;
