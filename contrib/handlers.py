@@ -70,6 +70,8 @@ class EmailNotificationHandler:
             notification.person.user.email,
             settings.LANGUAGE_CODE,
         )
+        plain_text_content = ''
+        html_content = ''
         for part in email_message.walk():
             if part.get_content_type() == "text/plain":
                 plain_text_content = part.get_payload()

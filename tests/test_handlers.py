@@ -1,5 +1,7 @@
 import email
+from email.message import EmailMessage
 
+from django.conf import settings
 from django.test import TestCase
 
 from base.tests.factories.person import PersonFactory
@@ -55,21 +57,41 @@ class HandlersTest(TestCase):
         email_message = email.message_from_string(email_notification.payload)
         self.assertTrue(email_message.is_multipart())
         # Now check the payload of each part (plain text and html)
+        plain_part = ''
+        html_part = ''
         for part in email_message.walk():
             if part.get_content_type() == "text/plain":
-                self.assertEqual(
-                    part.get_payload().rstrip("\n"),
-                    self.email_notification_data["plain_text_content"],
-                )
+                plain_part = part.get_payload().rstrip("\n")
             elif part.get_content_type() == "text/html":
-                self.assertEqual(
-                    part.get_payload().rstrip("\n"),
-                    self.email_notification_data["html_content"],
-                )
+                html_part = part.get_payload().rstrip("\n")
+        self.assertEqual(
+            plain_part,
+            self.email_notification_data["plain_text_content"],
+        )
+        self.assertEqual(
+            html_part,
+            self.email_notification_data["html_content"],
+        )
         self.assertEqual(
             email_message.get("subject"),
             self.email_notification_data["subject"],
         )
+
+    def test_email_notification_handler_process_with_message_without_html(self):
+        email_message = EmailMessage()
+        email_message.set_charset(settings.DEFAULT_CHARSET)
+        email_message.set_content("Test message")
+        email_message["Subject"] = "Test subject"
+        email_message["From"] = settings.DEFAULT_FROM_EMAIL
+        email_message["To"] = self.email_notification_data['recipient'].user.email
+        email_notification = EmailNotificationHandler.create(email_message)
+
+        # Now check that we can process it
+        EmailNotificationHandler.process(email_notification)
+        email_notification.refresh_from_db()
+        self.assertEqual(message_history.MessageHistory.objects.count(), 1)
+        self.assertEqual(email_notification.state, NotificationStates.SENT_STATE.name)
+        self.assertIsNotNone(email_notification.sent_at)
 
     def test_email_notification_handler_process_is_sending_the_email(self):
         self.assertEqual(message_history.MessageHistory.objects.count(), 0)
