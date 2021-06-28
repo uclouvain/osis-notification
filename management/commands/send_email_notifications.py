@@ -13,5 +13,5 @@ class Command(BaseCommand):
             EmailNotificationHandler.process(notification)
             email_notification_sent.send(
                 sender=self.__class__,
-                notification_uuid=notification.uuid,
+                notification=notification,
             )

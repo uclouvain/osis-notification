@@ -13,5 +13,5 @@ class Command(BaseCommand):
             WebNotificationHandler.process(notification)
             web_notification_sent.send(
                 sender=self.__class__,
-                notification_uuid=notification.uuid,
+                notification=notification,
             )

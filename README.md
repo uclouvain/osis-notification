@@ -141,12 +141,18 @@ from django.dispatch import receiver
 from osis_notification.signals import email_notification_sent, web_notification_sent
 
 @receiver(email_notification_sent)
-def email_notification_has_been_sent(sender, notification_uuid, **kwargs):
-    print(f"An email notification was sent from sender {sender} with the uuid {notification_uuid}")
+def email_notification_has_been_sent(sender, notification, **kwargs):
+    print(
+        f"An email notification was sent from signal sender {sender} with the"
+        f"uuid {notification.uuid} to {notification.person}."
+    )
     
 @receiver(web_notification_sent)
-def web_notification_has_been_sent(sender, notification_uuid, **kwargs):
-    print(f"A web notification was sent from sender {sender} with the uuid {notification_uuid}")
+def web_notification_has_been_sent(sender, notification, **kwargs):
+    print(
+        f"An web notification was sent from signal sender {sender} with the"
+        f"uuid {notification.uuid} to {notification.person}."
+    )
 ```
 
 ## Cleaning notifications
