@@ -1,7 +1,17 @@
+import abc
+
 from base.models.person import Person
 
 
-class EmailNotification(object):
+class Notification(abc.ABC):
+    def pre_process(self):
+        pass
+
+    def post_process(self):
+        pass
+
+
+class EmailNotification(Notification):
     def __init__(
         self,
         recipient: Person,
@@ -24,7 +34,7 @@ class EmailNotification(object):
         self.html_content = html_content
 
 
-class WebNotification(object):
+class WebNotification(Notification):
     def __init__(self, recipient: Person, content: str):
         """This class must be implemented in order to use the web notification handlers.
 
