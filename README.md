@@ -86,15 +86,15 @@ notification = EmailNotification(
     html_content=html_content,
 )
 ```
-Use this object to build the EmailMessage and create the EmailNotification :
+Use this object to create the EmailNotification :
 ```python
 from osis_notification.contrib.handlers import EmailNotificationHandler
 
-# Build the EmailMessage 
-email_message = EmailNotificationHandler.build(notification)
 # And finally create the EmailNotification
-email_notification = EmailNotificationHandler.create(email_message)
+email_notification = EmailNotificationHandler.create(notification=notification)
 ```
+
+This mail notification will automatically be sent by the task runner.
 
 #### An example using osis_mail_template
 
@@ -103,17 +103,9 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 
 recipient = Person.objects.get(user__username="jmr")
 language = recipient.language
-tokens = {"username": person.user.username}
+tokens = {"username": recipient.user.username}
 email_message = generate_email(your_mail_template_id, language, tokens, recipients=[recipient])
-email_notification = EmailNotificationHandler.create(email_message)
-```
-
-Then you have to give the objet to the EmailNotificationHandler :
-
-```python
-from osis_notification.contrib.handlers import EmailNotificationHandler
-
-EmailNotificationHandler.create(email_notification)
+email_notification = EmailNotificationHandler.create(mail=email_message)
 ```
 
 This mail notification will automatically be send by the task runner.
@@ -132,27 +124,31 @@ call_command("send_web_notifications")
 
 The commands are calling the `process` function on their respective handlers for each notification that are found in the DB with the "Pending" state.
 
-## Knowing when notifications are sent
+## Add pre/post-processing treatment
 
-We use signals to know when the task runner gets its job done. To know when a notification has been sent, just connect to the signals doing so :
+You can interface code before and after a notification is processed. To do so, you must define your code inside `pre_process` and `post_process` :
 
 ```python
-from django.dispatch import receiver
-from osis_notification.signals import email_notification_sent, web_notification_sent
+from osis_notification.contrib.notification import EmailNotification, WebNotification
 
-@receiver(email_notification_sent)
-def email_notification_has_been_sent(sender, notification, **kwargs):
-    print(
-        f"An email notification was sent from signal sender {sender} with the"
-        f"uuid {notification.uuid} to {notification.person}."
-    )
+class YourCustomEmailNotification(EmailNotification):
+    def pre_process(self):
+        # your custom actions before sending a notification should live here
+        print(self.recipient, self.subject, self.plain_text_content, self.html_content)
     
-@receiver(web_notification_sent)
-def web_notification_has_been_sent(sender, notification, **kwargs):
-    print(
-        f"An web notification was sent from signal sender {sender} with the"
-        f"uuid {notification.uuid} to {notification.person}."
-    )
+    def post_process(self):
+        # your custom actions after sending a notification should live here
+        print(self.recipient, self.subject, self.plain_text_content, self.html_content)
+
+# Same thing with a web notification    
+class YourCustomWebNotification(WebNotification):
+    def pre_process(self):
+        # your custom actions before sending a notification should live here
+        print(self.recipient, self.content)
+    
+    def post_process(self):
+        # your custom actions after sending a notification should live here
+        print(self.recipient, self.content)
 ```
 
 ## Cleaning notifications
@@ -201,6 +197,4 @@ Then you can integrate the component:
 
  - `data-url` : API endpoint that returns all the notifications.
  - `data-interval` : The interval, in second, to fetch the notifications from the server (default to 300).
-
-
 
