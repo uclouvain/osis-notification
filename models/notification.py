@@ -1,4 +1,5 @@
 import uuid
+
 from django.db import models
 from django.utils.translation import gettext as _
 
@@ -30,6 +31,17 @@ class Notification(models.Model):
     created_at = models.DateTimeField(verbose_name=_("Created at"), auto_now_add=True)
     sent_at = models.DateTimeField(verbose_name=_("Sent at"), editable=False, null=True)
     read_at = models.DateTimeField(verbose_name=_("Read at"), editable=False, null=True)
+
+    built_from_module = models.TextField(
+        help_text=_("Entry built from this module"),
+        editable=False,
+        null=True,
+    )
+    built_from_class_name = models.TextField(
+        help_text=_("Entry built from this class"),
+        editable=False,
+        null=True,
+    )
 
     class Meta:
         ordering = ["-created_at"]
