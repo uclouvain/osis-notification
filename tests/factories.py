@@ -8,6 +8,8 @@ class EmailNotificationFactory(factory.DjangoModelFactory):
         model = "osis_notification.EmailNotification"
 
     person = factory.SubFactory(PersonFactory)
+    built_from_module = "osis_notification.contrib.notification"
+    built_from_class_name = "EmailNotification"
 
 
 class WebNotificationFactory(factory.DjangoModelFactory):
@@ -16,3 +18,5 @@ class WebNotificationFactory(factory.DjangoModelFactory):
 
     person = factory.SubFactory(PersonFactory)
     payload = factory.fuzzy.FuzzyText()
+    built_from_module = "osis_notification.contrib.notification"
+    built_from_class_name = "WebNotification"
