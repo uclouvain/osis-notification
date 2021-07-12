@@ -35,7 +35,7 @@ class EmailNotificationHandler:
         mail.add_alternative(notification.html_content, subtype="html")
         mail["Subject"] = notification.subject
         mail["From"] = settings.DEFAULT_FROM_EMAIL
-        mail["To"] = notification.recipient.user.email
+        mail["To"] = notification.recipient.email
 
         return mail
 
@@ -51,7 +51,7 @@ class EmailNotificationHandler:
         :return: The created EmailNotification."""
 
         if person is None:
-            person = Person.objects.get(user__email=mail["To"])
+            person = Person.objects.get(email=mail["To"])
 
         return EmailNotification.objects.create(
             person=person,
@@ -67,7 +67,7 @@ class EmailNotificationHandler:
         email_message = email.message_from_string(notification.payload)
         receiver = create_receiver(
             notification.person.id,
-            notification.person.user.email,
+            notification.person.email,
             settings.LANGUAGE_CODE,
         )
         plain_text_content = ''
