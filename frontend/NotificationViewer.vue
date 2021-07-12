@@ -81,6 +81,7 @@
           :state="notification.state"
           :sent-at="notification.sent_at"
           :payload="notification.payload"
+          :truncate-length="truncateLength"
           @toggle="toggleState"
       />
       <li
@@ -135,6 +136,10 @@ export default {
     limit: {
       type: Number,
       default: 15,
+    },
+    truncateLength: {
+      type: Number,
+      default: 60,
     },
   },
   data() {

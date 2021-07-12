@@ -41,6 +41,8 @@ const messages = {
     notification: {
       mark_as_read: 'Mark as read',
       mark_as_unread: 'Mark as unread',
+      show_less: 'Show less',
+      show_more: 'Show more',
     },
   },
   'fr-be': {
@@ -54,6 +56,8 @@ const messages = {
     notification: {
       mark_as_read: 'Marquer comme lu',
       mark_as_unread: 'Marquer comme non-lu',
+      show_less: 'Voir moins',
+      show_more: 'Voir plus',
     },
   },
 };
