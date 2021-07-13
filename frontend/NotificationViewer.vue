@@ -101,8 +101,7 @@
         </div>
       </li>
       <li
-          v-else
-          v-show="hasNextPage"
+          v-else-if="hasNextPage"
           class="text-center"
       >
         <button
