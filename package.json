@@ -66,5 +66,8 @@
       "!frontend/**/*.stories.js",
       "!frontend/main.js"
     ]
+  },
+  "dependencies": {
+    "vue-truncate-collapsed": "^3.0.1"
   }
 }

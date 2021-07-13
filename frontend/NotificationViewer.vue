@@ -81,6 +81,7 @@
           :state="notification.state"
           :sent-at="notification.sent_at"
           :payload="notification.payload"
+          :truncate-length="truncateLength"
           @toggle="toggleState"
       />
       <li
@@ -136,6 +137,10 @@ export default {
       type: Number,
       default: 15,
     },
+    truncateLength: {
+      type: Number,
+      default: 60,
+    },
   },
   data() {
     return {
@@ -145,12 +150,8 @@ export default {
       pageSize: this.limit,
       error: '',
       loading: true,
+      unreadNotificationsCount: 0,
     };
-  },
-  computed: {
-    unreadNotificationsCount: function () {
-      return this.notifications.filter(notification => notification.state === 'SENT_STATE').length;
-    },
   },
   async mounted() {
     await this.fetchNotifications();
@@ -169,6 +170,7 @@ export default {
         }
         this.notifications = newNotifications.results;
         this.hasNextPage = !!newNotifications.next;
+        this.unreadNotificationsCount = newNotifications.unread_count;
       } catch (error) {
         this.error = `${this.$t('notification_viewer.error_fetch_notifications')} ( ${error.statusText} )`;
       } finally {
@@ -185,6 +187,17 @@ export default {
           const notificationIndex = this.notifications.findIndex((notification) => notification.uuid === uuid);
           const newNotification = await response.json();
           this.$set(this.notifications, notificationIndex, newNotification);
+          // update unread notifications count
+          if (newNotification.state === 'SENT_STATE') {
+            this.unreadNotificationsCount++;
+          } else {
+            this.unreadNotificationsCount--;
+          }
+          // if all the notifications are read and there is still unread notification, fetch all the notifications
+          // to display the ones that are not read first.
+          if (this.notifications.filter(n => n.state === 'SENT_STATE').length !== this.unreadNotificationsCount) {
+            await this.fetchNotifications();
+          }
         } else {
           this.error = `${this.$t('notification_viewer.error_mark_as_read')}`;
         }
@@ -200,7 +213,8 @@ export default {
         });
         const notifications = await response.json();
         if (response.status === 200 && notifications.length > 0) {
-          this.notifications = notifications;
+          this.notifications.forEach(notification => notification.state = "READ_STATE");
+          this.unreadNotificationsCount = 0;
         } else {
           this.error = `${this.$t('notification_viewer.error_mark_all_as_read')}`;
         }

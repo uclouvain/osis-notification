@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -13,22 +15,31 @@ from osis_notification.models import WebNotification
 from osis_notification.models.enums import NotificationStates
 
 
-class NotificationSetPagination(LimitOffsetPagination):
-    default_limit = 15
-
-
-@method_decorator(ensure_csrf_cookie, name='dispatch')
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class SentNotificationListView(generics.ListAPIView):
     """Return all sent notifications associated to a specific user."""
 
-    queryset = WebNotification.objects.sent()
     serializer_class = WebNotificationSerializer
     permission_classes = (IsAuthenticated,)
-    pagination_class = NotificationSetPagination
-    authentication_classes = (SessionAuthentication, )
+    pagination_class = LimitOffsetPagination
+    authentication_classes = (SessionAuthentication,)
+
+    def get_paginated_response(self, data):
+        unread_count = (
+            self.get_queryset().filter(state=NotificationStates.SENT_STATE.name).count()
+        )
+        return Response(OrderedDict([
+            ("count", self.paginator.count),
+            ("unread_count", unread_count),
+            ("next", self.paginator.get_next_link()),
+            ("previous", self.paginator.get_previous_link()),
+            ("results", data),
+        ]))
 
     def get_queryset(self):
-        return super().get_queryset().filter(person__uuid=self.request.user.person.uuid)
+        return WebNotification.objects.sent().filter(
+            person__uuid=self.request.user.person.uuid
+        )
 
 
 class MarkNotificationAsReadView(generics.UpdateAPIView):
@@ -38,7 +49,7 @@ class MarkNotificationAsReadView(generics.UpdateAPIView):
     queryset = WebNotification.objects.sent()
     serializer_class = WebNotificationSerializer
     permission_classes = (IsAuthenticated,)
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (SessionAuthentication,)
 
     def get_object(self):
         return get_object_or_404(
@@ -58,7 +69,7 @@ class MarkAllNotificationsAsReadView(views.APIView):
     queryset = WebNotification.objects.sent()
     serializer_class = WebNotificationSerializer
     permission_classes = (IsAuthenticated,)
-    authentication_classes = (SessionAuthentication, )
+    authentication_classes = (SessionAuthentication,)
 
     def get_queryset(self):
         return self.queryset.filter(

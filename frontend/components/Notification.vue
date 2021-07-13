@@ -35,16 +35,25 @@
         @click.prevent="$emit('toggle', uuid)"
     >
     <span class="label label-primary">{{ sentAt }}</span>
-    <!-- Disable the vue/no-v-html warning -->
-    <!-- eslint-disable-next-line -->
-    <div class="notification-text" :class="{ 'font-bold': isSent }" v-html="payload"/>
+    <truncate
+        action-class="btn btn-link"
+        class="notification-text"
+        type="html"
+        :class="{ 'font-bold': isSent }"
+        :clamp="$t('notification.show_more')"
+        :length="truncateLength"
+        :less="$t('notification.show_less')"
+        :text="payload"
+    />
   </li>
 </template>
 
 <script>
+import truncate from 'vue-truncate-collapsed';
 
 export default {
   name: 'Notification',
+  components: { truncate },
   props: {
     uuid: {
       type: String,
@@ -60,6 +69,10 @@ export default {
     },
     payload: {
       type: String,
+      required: true,
+    },
+    truncateLength: {
+      type: Number,
       required: true,
     },
   },
