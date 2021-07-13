@@ -1,0 +1,101 @@
+info:
+  description: ''
+  title: ''
+  version: ''
+openapi: 3.0.0
+paths:
+  /notifications/v1/:
+    get:
+      description: Return all sent notifications associated to a specific user.
+      operationId: v1_list
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          description: Number of results to return per page.
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          description: The initial index from which to return the results.
+          title: Offset
+          type: integer
+      - in: query
+        name: ordering
+        schema:
+          description: Which field to use when ordering the results.
+          title: Ordre
+          type: string
+      - in: query
+        name: search
+        schema:
+          description: A search term.
+          title: Rechercher
+          type: string
+      tags:
+      - v1
+  /notifications/v1/{notification_uuid}:
+    patch:
+      description: 'Mark a single given notification as read if the notification is
+        sent. If the notification is already mark as sent, it marks it as sent.'
+      operationId: v1_partial_update
+      parameters:
+      - in: path
+        name: notification_uuid
+        required: true
+        schema:
+          description: ''
+          title: ''
+          type: string
+      - in: query
+        name: ordering
+        schema:
+          description: Which field to use when ordering the results.
+          title: Ordre
+          type: string
+      - in: query
+        name: search
+        schema:
+          description: A search term.
+          title: Rechercher
+          type: string
+      tags:
+      - v1
+    put:
+      description: 'Mark a single given notification as read if the notification is
+        sent. If the notification is already mark as sent, it marks it as sent.'
+      operationId: v1_update
+      parameters:
+      - in: path
+        name: notification_uuid
+        required: true
+        schema:
+          description: ''
+          title: ''
+          type: string
+      - in: query
+        name: ordering
+        schema:
+          description: Which field to use when ordering the results.
+          title: Ordre
+          type: string
+      - in: query
+        name: search
+        schema:
+          description: A search term.
+          title: Rechercher
+          type: string
+      tags:
+      - v1
+servers:
+  - url: https://{environment}.osis.uclouvain.be/
+    variables:
+      environment:
+        default: dev
+        enum:
+          - dev # Development server
+          - qa # Staging server
+          - test # Test server
+  - url: https://osis.uclouvain.be/
+    description: 'Production server'
