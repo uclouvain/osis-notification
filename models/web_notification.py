@@ -9,9 +9,12 @@ class WebNotificationManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(type=NotificationTypes.WEB_TYPE.name)
 
+    def order_by_sent_first(self):
+        """Notifications with SENT_STATE will come first"""
+        return self.get_queryset().order_by("-state", "created_at")
+
     def pending(self):
         """Returns all the pending web notifications."""
-
         return (
             self.get_queryset()
             .filter(state=NotificationStates.PENDING_STATE.name)
@@ -19,18 +22,12 @@ class WebNotificationManager(models.Manager):
         )
 
     def sent(self):
-        """Return all the sent notifications from oldest to newest, including all the
-        read notifications."""
-
-        return (
-            self.get_queryset()
-            .filter(
-                state__in=[
-                    NotificationStates.SENT_STATE.name,
-                    NotificationStates.READ_STATE.name,
-                ],
-            )
-            .order_by("created_at")
+        """Return all the sent notifications, including all the read notifications."""
+        return self.order_by_sent_first().filter(
+            state__in=[
+                NotificationStates.SENT_STATE.name,
+                NotificationStates.READ_STATE.name,
+            ],
         )
 
     def create(self, **kwargs):

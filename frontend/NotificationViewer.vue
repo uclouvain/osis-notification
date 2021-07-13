@@ -83,6 +83,35 @@
           :payload="notification.payload"
           @toggle="toggleState"
       />
+      <li
+          v-if="loading"
+          class="progress"
+      >
+        <div
+            class="progress-bar progress-bar-striped active"
+            role="progressbar"
+            aria-valuenow="100"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            style="width: 100%"
+        >
+          <span class="sr-only">
+            Loading
+          </span>
+        </div>
+      </li>
+      <li
+          v-else-if="hasNextPage"
+          class="text-center"
+      >
+        <button
+            type="button"
+            class="btn btn-link"
+            @click="loadMore"
+        >
+          {{ $t('notification_viewer.load_more') }}
+        </button>
+      </li>
     </ul>
   </li>
 </template>
@@ -103,12 +132,19 @@ export default {
       type: Number,
       default: 300,
     },
+    limit: {
+      type: Number,
+      default: 15,
+    },
   },
   data() {
     return {
       notifications: [],
+      hasNextPage: false,
       animationEnabled: false,
+      pageSize: this.limit,
       error: '',
+      loading: true,
     };
   },
   computed: {
@@ -126,14 +162,17 @@ export default {
   methods: {
     fetchNotifications: async function () {
       try {
-        const response = await fetch(this.url);
+        const response = await fetch(`${this.url}?limit=${this.pageSize}`);
         const newNotifications = await response.json();
         if (newNotifications.count) {
           this.animationEnabled = true;
         }
         this.notifications = newNotifications.results;
+        this.hasNextPage = !!newNotifications.next;
       } catch (error) {
         this.error = `${this.$t('notification_viewer.error_fetch_notifications')} ( ${error.statusText} )`;
+      } finally {
+        this.loading = false;
       }
     },
     toggleState: async function (uuid) {
@@ -168,6 +207,17 @@ export default {
       } catch (error) {
         this.error = `${this.$t('notification_viewer.error_mark_all_as_read')} ( ${error.statusText} )`;
       }
+    },
+    /**
+     * We use the ?limit to get new tasks when clicking on the 'Load more' button as we need to keep all the previous
+     * tasks and add the new ones. All this will be override by the setInterval that fetch all the async tasks if we
+     * use the ?offset. So it may generate a big request, but it is very unlikely.
+     */
+    loadMore: function (e) {
+       e.stopPropagation();
+      this.loading = true;
+      this.pageSize += this.limit;
+      this.fetchNotifications();
     },
   },
 };

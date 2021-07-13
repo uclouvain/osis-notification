@@ -44,7 +44,7 @@ const mockSentNotifications = {
      },
    ],
 };
-fetchMock.get('/', mockSentNotifications)
+fetchMock.get('/?limit=15', mockSentNotifications)
   .get('/error', {throws: 'This is an error'})
   .put('/mark_all_as_read', function () {
     mockSentNotifications.results.forEach(notification => {
