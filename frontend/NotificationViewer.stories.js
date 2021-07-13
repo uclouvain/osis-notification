@@ -4,6 +4,7 @@ import fetchMock from 'fetch-mock';
 
 const mockNotifications = {
   count: 3,
+  unread_count: 2,
   next: 'mockNotifications2',
   results: [
     {
