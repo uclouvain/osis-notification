@@ -246,6 +246,8 @@ export default {
   .notification-dropdown {
     min-width: 70vw;
     padding: 15px;
+    overflow-y: scroll;
+    max-height: 320px;
   }
 }
 
