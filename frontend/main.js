@@ -32,6 +32,12 @@ document.querySelectorAll('#notification-viewer').forEach((elem) => {
   if (typeof props.interval !== 'undefined') {
     props.interval = Number.parseInt(props.interval);
   }
+  if (typeof props.limit !== 'undefined') {
+    props.limit = Number.parseInt(props.limit);
+  }
+  if (typeof props.truncateLength !== 'undefined') {
+    props.truncateLength = Number.parseInt(props.truncateLength);
+  }
   new Vue({
     render: (h) => h(NotificationViewer, { props }),
     i18n,
