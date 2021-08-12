@@ -56,7 +56,7 @@ class SendNotificationsTest(TestCase):
         self.assertEqual(
             self.web_notification.state, NotificationStates.PENDING_STATE.name
         )
-        with self.assertNumQueriesLessThan(3):
+        with self.assertNumQueriesLessThan(4):
             call_command("send_web_notifications")
         self.web_notification.refresh_from_db()
         # now web notification should be in sent state

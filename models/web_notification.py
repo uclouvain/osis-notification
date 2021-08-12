@@ -40,11 +40,7 @@ class WebNotificationManager(models.Manager):
         :return: The newly created WebNotification object.
         """
 
-        return super().create(
-            type=NotificationTypes.WEB_TYPE.name,
-            person=kwargs.get("person"),
-            payload=kwargs.get("payload"),
-        )
+        return super().create(type=NotificationTypes.WEB_TYPE.name, **kwargs)
 
 
 class WebNotification(Notification):

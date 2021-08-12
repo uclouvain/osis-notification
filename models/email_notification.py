@@ -28,11 +28,7 @@ class EmailNotificationManager(models.Manager):
         :return: The newly created EmailNotification object.
         """
 
-        return super().create(
-            type=NotificationTypes.EMAIL_TYPE.name,
-            person=kwargs.get("person"),
-            payload=kwargs.get("payload"),
-        )
+        return super().create(type=NotificationTypes.EMAIL_TYPE.name, **kwargs)
 
 
 class EmailNotification(Notification):
