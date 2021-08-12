@@ -88,6 +88,12 @@ paths:
           type: string
       tags:
       - v1
+  /notifications/v1/mark_all_as_read:
+    put:
+      description: 'Mark all the current user sent notifications as read.'
+      operationId: v1_mak_all_as_read
+      tags:
+      - v1
 servers:
   - url: https://{environment}.osis.uclouvain.be/
     variables:
