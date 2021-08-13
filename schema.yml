@@ -9,30 +9,35 @@ paths:
       description: Return all sent notifications associated to a specific user.
       operationId: notification_list
       parameters:
-      - in: query
-        name: limit
-        schema:
-          description: Number of results to return per page.
-          title: Limit
-          type: integer
-      - in: query
-        name: offset
-        schema:
-          description: The initial index from which to return the results.
-          title: Offset
-          type: integer
-      - in: query
-        name: ordering
-        schema:
-          description: Which field to use when ordering the results.
-          title: Ordre
-          type: string
-      - in: query
-        name: search
-        schema:
-          description: A search term.
-          title: Rechercher
-          type: string
+        - $ref: '#/components/parameters/Accept-Language'
+        - $ref: '#/components/parameters/X-User-FirstName'
+        - $ref: '#/components/parameters/X-User-LastName'
+        - $ref: '#/components/parameters/X-User-Email'
+        - $ref: '#/components/parameters/X-User-GlobalID'
+        - in: query
+          name: limit
+          schema:
+            description: Number of results to return per page.
+            title: Limit
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            description: The initial index from which to return the results.
+            title: Offset
+            type: integer
+        - in: query
+          name: ordering
+          schema:
+            description: Which field to use when ordering the results.
+            title: Ordre
+            type: string
+        - in: query
+          name: search
+          schema:
+            description: A search term.
+            title: Rechercher
+            type: string
       responses:
         '200':
           description: OK
@@ -45,32 +50,37 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
       tags:
-      - notification
+        - notification
   /{notification_uuid}:
     patch:
       description: 'Mark a single given notification as read if the notification is
         sent. If the notification is already mark as sent, it marks it as sent.'
       operationId: notification_partial_update
       parameters:
-      - in: path
-        name: notification_uuid
-        required: true
-        schema:
-          description: ''
-          title: ''
-          type: string
-      - in: query
-        name: ordering
-        schema:
-          description: Which field to use when ordering the results.
-          title: Ordre
-          type: string
-      - in: query
-        name: search
-        schema:
-          description: A search term.
-          title: Rechercher
-          type: string
+        - $ref: '#/components/parameters/Accept-Language'
+        - $ref: '#/components/parameters/X-User-FirstName'
+        - $ref: '#/components/parameters/X-User-LastName'
+        - $ref: '#/components/parameters/X-User-Email'
+        - $ref: '#/components/parameters/X-User-GlobalID'
+        - in: path
+          name: notification_uuid
+          required: true
+          schema:
+            description: ''
+            title: ''
+            type: string
+        - in: query
+          name: ordering
+          schema:
+            description: Which field to use when ordering the results.
+            title: Ordre
+            type: string
+        - in: query
+          name: search
+          schema:
+            description: A search term.
+            title: Rechercher
+            type: string
       responses:
         '200':
           description: OK
@@ -83,31 +93,36 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
       tags:
-      - notification
+        - notification
     put:
       description: 'Mark a single given notification as read if the notification is
         sent. If the notification is already mark as sent, it marks it as sent.'
       operationId: notification_update
       parameters:
-      - in: path
-        name: notification_uuid
-        required: true
-        schema:
-          description: ''
-          title: ''
-          type: string
-      - in: query
-        name: ordering
-        schema:
-          description: Which field to use when ordering the results.
-          title: Ordre
-          type: string
-      - in: query
-        name: search
-        schema:
-          description: A search term.
-          title: Rechercher
-          type: string
+        - $ref: '#/components/parameters/Accept-Language'
+        - $ref: '#/components/parameters/X-User-FirstName'
+        - $ref: '#/components/parameters/X-User-LastName'
+        - $ref: '#/components/parameters/X-User-Email'
+        - $ref: '#/components/parameters/X-User-GlobalID'
+        - in: path
+          name: notification_uuid
+          required: true
+          schema:
+            description: ''
+            title: ''
+            type: string
+        - in: query
+          name: ordering
+          schema:
+            description: Which field to use when ordering the results.
+            title: Ordre
+            type: string
+        - in: query
+          name: search
+          schema:
+            description: A search term.
+            title: Rechercher
+            type: string
       responses:
         '200':
           description: OK
@@ -120,11 +135,17 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
       tags:
-      - notification
+        - notification
   /mark_all_as_read:
     put:
       description: 'Mark all the current user sent notifications as read.'
       operationId: notification_mak_all_as_read
+      parameters:
+        - $ref: '#/components/parameters/Accept-Language'
+        - $ref: '#/components/parameters/X-User-FirstName'
+        - $ref: '#/components/parameters/X-User-LastName'
+        - $ref: '#/components/parameters/X-User-Email'
+        - $ref: '#/components/parameters/X-User-GlobalID'
       responses:
         '200':
           description: OK
@@ -137,7 +158,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
       tags:
-      - notification
+        - notification
 servers:
   - url: https://{environment}.osis.uclouvain.be/notifications/v1/
     variables:
