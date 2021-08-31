@@ -1,0 +1,2 @@
+recursive-include osis_notification/static *
+recursive-include osis_notification/locale *
