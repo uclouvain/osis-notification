@@ -132,6 +132,29 @@ call_command("send_web_notifications")
 
 The commands are calling the `process` function on their respective handlers for each notification that are found in the DB with the "Pending" state.
 
+## Knowing when notifications are sent
+
+We use signals to know when the task runner gets its job done. To know when a notification has been sent, just connect to the signals doing so :
+
+```python
+from django.dispatch import receiver
+from osis_notification.signals import email_notification_sent, web_notification_sent
+
+@receiver(email_notification_sent)
+def email_notification_has_been_sent(sender, notification, **kwargs):
+    print(
+        f"An email notification was sent from signal sender {sender} with the"
+        f"uuid {notification.uuid} to {notification.person}."
+    )
+    
+@receiver(web_notification_sent)
+def web_notification_has_been_sent(sender, notification, **kwargs):
+    print(
+        f"An web notification was sent from signal sender {sender} with the"
+        f"uuid {notification.uuid} to {notification.person}."
+    )
+```
+
 ## Cleaning notifications
 
 To avoid database overflowing, all the sent email notifications and the read web notifications are deleted after a defined retention duration. You will have to define this duration in your Django settings like this :
@@ -178,3 +201,6 @@ Then you can integrate the component:
 
  - `data-url` : API endpoint that returns all the notifications.
  - `data-interval` : The interval, in second, to fetch the notifications from the server (default to 300).
+
+
+
