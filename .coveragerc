@@ -1,9 +1,8 @@
 [run]
 branch = True
-source = osis_notification
+source = osis_notification/osis_notification
 omit =
     */migrations/*
-    venv/*
     */tests/*
     */management/*
     */admin.py

@@ -1,6 +1,6 @@
 # OSIS Notification
 
-`OSIS Notification` is a Django application to manage notifications sending across OSIS plateform.
+`OSIS Notification` is a Django application to manage notifications sending across OSIS platform.
 
 
 Requirements
@@ -10,10 +10,25 @@ Requirements
 
 - Django 2.2+
 - Django REST Framework 3.12+
-- Celery 4+
 - Vue 3
 
 # How to install ?
+
+## For production
+
+```bash
+# From your osis install, with python environment activated
+pip install git+https://github.com/uclouvain/osis-notification.git@dev#egg=osis_notification
+```
+
+## For development
+
+```bash
+# From your osis install, with python environment activated
+git clone git@github.com:uclouvain/osis-notification.git
+pip install -e ./osis-notification
+```
+
 
 ## Configuring Django
 
