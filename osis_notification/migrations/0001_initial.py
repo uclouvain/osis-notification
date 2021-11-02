@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
                 ('type', models.CharField(choices=[('EMAIL_TYPE', 'Email notification'), ('WEB_TYPE', 'Web notification')], max_length=25, verbose_name='Type')),
                 ('payload', models.TextField(verbose_name='Payload')),
-                ('state', models.CharField(choices=[('PENDING_STATE', 'En attente'), ('SENT_STATE', 'Sent'), ('READ_STATE', 'Read')], default='PENDING_STATE', max_length=25, verbose_name='État')),
+                ('state', models.CharField(choices=[('PENDING_STATE', 'Pending'), ('SENT_STATE', 'Sent'), ('READ_STATE', 'Read')], default='PENDING_STATE', max_length=25, verbose_name='State')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
                 ('sent_at', models.DateTimeField(editable=False, null=True, verbose_name='Sent at')),
                 ('read_at', models.DateTimeField(editable=False, null=True, verbose_name='Read at')),
