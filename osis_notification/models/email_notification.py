@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 from osis_notification.models import Notification
 from osis_notification.models.enums import NotificationStates, NotificationTypes
