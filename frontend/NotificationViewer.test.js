@@ -45,7 +45,7 @@ const mockSentNotifications = {
    ],
 };
 fetchMock.get('/?limit=15', mockSentNotifications)
-  .get('/error', {throws: 'This is an error'})
+    .get('/error?limit=15', { throws: 'This is an error' })
   .put('/mark_all_as_read', function () {
     mockSentNotifications.results.forEach(notification => {
       notification.state = 'READ_STATE';
@@ -64,12 +64,13 @@ describe('component lifecycle', () => {
   const on = jest.fn();
   window.jQuery = jest.fn(() => ({
     on,
+    tooltip: jest.fn(),
   }));
 
   it('should mount', async () => {
     const wrapper = mount(NotificationViewer, {
       propsData: {
-        url: '/',
+        baseUrl: '/',
       },
       mocks: {
         jQuery,
@@ -77,19 +78,20 @@ describe('component lifecycle', () => {
       },
     });
 
-    expect(wrapper.text()).toContain('notification_viewer.mark_all_as_read');
+    expect(wrapper.text()).toContain('notification_viewer.loading');
     expect(on).toHaveBeenCalled();
     expect(wrapper.vm.notifications.length).toBe(0);
     await Vue.nextTick(); // wait for request
     await Vue.nextTick(); // wait for loading
     await Vue.nextTick(); // wait for re-rendering
     expect(wrapper.vm.notifications.length).toBe(1);
+    expect(wrapper.text()).toContain('notification_viewer.mark_all_as_read');
   });
 
   it('should display an error if fetching notifications fail', async () => {
     const wrapper = mount(NotificationViewer, {
       propsData: {
-        url: '/error',
+        baseUrl: '/error',
       },
       mocks: {
         jQuery,
@@ -107,7 +109,7 @@ describe('component lifecycle', () => {
 describe('toggle notification state', () => {
   const wrapper = mount(NotificationViewer, {
     propsData: {
-      url: '/',
+      baseUrl: '/',
     },
     mocks: {
       jQuery,
@@ -143,7 +145,7 @@ describe('toggle notification state', () => {
 describe('mark all notifications as read', () => {
   const wrapper = mount(NotificationViewer, {
     propsData: {
-      url: '/',
+      baseUrl: '/',
     },
     mocks: {
       jQuery,

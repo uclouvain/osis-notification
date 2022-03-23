@@ -36,18 +36,35 @@ Add `osis_notification` to `INSTALLED_APPS` and configure the email and web rete
 
 ```python
 INSTALLED_APPS = (
-    ...
+    ...,
     'osis_notification',
-    ...
+    ...,
 )
 
 EMAIL_NOTIFICATIONS_RETENTION_DAYS = 15
 WEB_NOTIFICATIONS_RETENTION_DAYS = 30
+
+# The primary server full url (do not set on primary server)
+OSIS_NOTIFICATION_BASE_URL = os.environ.get('OSIS_NOTIFICATION_BASE_URL', 'https://yourserver.com/')
+
+# When used on multiple servers, set the domains on which raw files may be displayed (for Content Security Policy)
+OSIS_NOTIFICATION_DOMAIN_LIST = [
+    '127.0.0.1:8001',
+]
+```
+
+OSIS-Notification is aimed at being run on multiple servers, so on your primary server, add it to your `urls.py`
+matching what you set in `settings.OSIS_NOTIFICATION_BASE_URL`:
+
+```python
+if 'osis_notification' in settings.INSTALLED_APPS:
+    urlpatterns += (path('osis_notification/', include('osis_notification.api.urls_v1')),)
 ```
 
 # Using OSIS Notification
 
-`osis_notification` provides an API to create and send notifications and also a VueJS component to view them in the interface.
+`osis_notification` provides an API to create and send notifications and also a VueJS component to view them in the
+interface.
 
 ## Web notification
 
@@ -167,8 +184,7 @@ call_command("clean_email_notifications")
 call_command("clean_web_notifications")
 ```
 
-
-# Integrate the front notification component
+# Integrate the front-end notification component
 
 Make the dependencies available:
 ```html
@@ -187,9 +203,13 @@ Make the dependencies available:
 ```
 
 Then you can integrate the component:
+
 ```html
-<div id="notification-viewer" data-url="{% url 'osis_notification:notification-list' %}" data-interval="300"></div>
+{% load osis_notification %}{% notification_viewer %}
 ```
 
- - `data-url` : API endpoint that returns all the notifications.
- - `data-interval` : The interval, in second, to fetch the notifications from the server (default to 300).
+And specify few options by passing them to `notification_viewer` tag:
+
+- `interval` : The interval, in second, to fetch the notifications from the server (default to 300)
+- `truncate_length`: number of characters after which the notification is truncated (default is 60)
+- `limit`: number of notification to display per page (default is 15)

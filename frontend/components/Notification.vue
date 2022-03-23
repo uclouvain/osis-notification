@@ -73,7 +73,7 @@ export default {
     },
     truncateLength: {
       type: Number,
-      required: true,
+      default: 60,
     },
   },
   computed: {
@@ -110,7 +110,6 @@ export default {
 
   .notification-text {
     display: block;
-    text-align: justify;
     white-space: initial;
     margin: 10px 10px 10px 55px;
   }

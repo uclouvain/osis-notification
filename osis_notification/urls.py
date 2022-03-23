@@ -23,8 +23,25 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.apps import AppConfig
+from django.urls import path as _path
+
+from osis_notification.api.utils import proxy_view
+from osis_notification.api.views import (
+    MarkAllNotificationsAsReadView,
+    MarkNotificationAsReadView,
+    SentNotificationListView,
+)
 
 
-class NotificationConfig(AppConfig):
-    name = "osis_notification"
+def proxy_path(pattern, view, name=None):
+    name = getattr(view, 'name', name)
+    view = proxy_view(view)
+    return _path(pattern, view, name=name)
+
+
+app_name = "osis_notification"
+urlpatterns = [
+    proxy_path("", SentNotificationListView),
+    proxy_path("mark_all_as_read", MarkAllNotificationsAsReadView),
+    proxy_path("<uuid:notification_uuid>", MarkNotificationAsReadView),
+]

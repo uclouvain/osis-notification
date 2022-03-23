@@ -24,7 +24,7 @@
  *
  */
 module.exports = {
-  outputDir: "static/osis_notification",
+  outputDir: 'osis_notification/static/osis_notification',
   configureWebpack(config) {
     // Removes demo.html
     config.plugins.some((plugin, index) => {

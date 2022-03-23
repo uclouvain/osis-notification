@@ -38,6 +38,7 @@ if (process.env.NODE_ENV === 'test') {
   // Mock jQuery for snapshots tests
   window.jQuery = jest.fn(() => ({
     on: () => {},
+    tooltip: () => {},
   }));
 }
 
@@ -45,9 +46,11 @@ export const noNotification = () => {
   fetchMock.restore().get('/?limit=15', {count: 0, results: []});
   return {
     components: { NotificationViewer },
-    template: `<ul class="nav navbar-nav">
-                 <NotificationViewer url="/" />
-               </ul>`,
+    template: `
+      <ul class="nav navbar-nav">
+      <NotificationViewer baseUrl="/" />
+      </ul>
+    `,
   };
 };
 
@@ -81,7 +84,7 @@ export const withNotifications = () => {
     components: { NotificationViewer },
     template: `
       <ul class="nav navbar-nav">
-        <NotificationViewer url="/" :interval="500" :limit="2" />
+      <NotificationViewer baseUrl="/" :interval="500" :limit="2" />
       </ul>
     `,
   };
@@ -97,7 +100,7 @@ export const withErrors = () => {
     components: { NotificationViewer },
     template: `
       <ul class="nav navbar-nav">
-        <NotificationViewer url="/" :interval="10" />
+      <NotificationViewer baseUrl="/" :interval="10" />
       </ul>
     `,
   };

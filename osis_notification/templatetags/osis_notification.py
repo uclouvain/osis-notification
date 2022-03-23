@@ -23,8 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.apps import AppConfig
+from django import template
+from django.shortcuts import resolve_url
+from django.utils.html import escapejs
+from django.utils.safestring import mark_safe
+
+register = template.Library()
 
 
-class NotificationConfig(AppConfig):
-    name = "osis_notification"
+@register.simple_tag
+def notification_viewer(**kwargs):
+    attrs = {'data-base-url': resolve_url("osis_notification:notification-list")}
+    for name, value in kwargs.items():
+        attrs['data-' + "-".join(name.lower().split("_"))] = escapejs(value)
+    return mark_safe(
+        '<div id="notification-viewer" {}></div>'.format(
+            " ".join('{}="{}"'.format(k, v) for k, v in attrs.items()),
+        )
+    )

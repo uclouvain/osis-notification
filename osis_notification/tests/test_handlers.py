@@ -83,7 +83,7 @@ class HandlersTest(TestCase):
         email_message.set_content("Test message")
         email_message["Subject"] = "Test subject"
         email_message["From"] = settings.DEFAULT_FROM_EMAIL
-        email_message["To"] = self.email_notification_data['recipient'].user.email
+        email_message["To"] = self.email_notification_data['recipient'].email
         email_notification = EmailNotificationHandler.create(email_message)
 
         # Now check that we can process it
@@ -96,7 +96,7 @@ class HandlersTest(TestCase):
     def test_email_notification_handler_process_is_sending_the_email(self):
         self.assertEqual(message_history.MessageHistory.objects.count(), 0)
         email_message = EmailNotificationHandler.build(self.email_notification)
-        email_notification = EmailNotificationHandler.create(email_message)
+        email_notification = EmailNotificationHandler.create(email_message, self.email_notification_data['recipient'])
         self.assertEqual(
             email_notification.state, NotificationStates.PENDING_STATE.name
         )
