@@ -23,8 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.apps import AppConfig
+from django.template import Context, Template
+from django.test import TestCase, override_settings
+from django.urls import include, path
+
+urlpatterns = [path('foo/', include('osis_notification.urls'))]
 
 
-class NotificationConfig(AppConfig):
-    name = "osis_notification"
+@override_settings(ROOT_URLCONF=__name__, OSIS_NOTIFICATION_BASE_URL="/")
+class TemplateTagTestCase(TestCase):
+    def test_template_tag(self):
+        rendered = Template('{% load osis_notification %}{% notification_viewer %}').render(context=Context())
+        self.assertEqual('<div id="notification-viewer" data-base-url="/foo/"></div>', rendered)
+
+        rendered = Template('{% load osis_notification %}{% notification_viewer limit=20 %}').render(context=Context())
+        self.assertEqual('<div id="notification-viewer" data-base-url="/foo/" data-limit="20"></div>', rendered)

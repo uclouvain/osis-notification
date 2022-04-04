@@ -27,26 +27,16 @@ exports[`Storyshots Global component No Notification 1`] = `
      
     <ul
       class="dropdown-menu notification-dropdown"
-      style="display: none;"
     >
-      <li>
-        <a
-          class="btn disabled"
-        >
-          
-        Mark all as read
-      
-        </a>
-      </li>
+      <!---->
+       
+      <!---->
        
       <!---->
        
       <!---->
        
-      <li
-        class="divider"
-        role="separator"
-      />
+      <!---->
         
       <li
         class="progress"
@@ -63,7 +53,7 @@ exports[`Storyshots Global component No Notification 1`] = `
             class="sr-only"
           >
             
-          Loading
+          Loading...
         
           </span>
         </div>
@@ -100,26 +90,16 @@ exports[`Storyshots Global component With Errors 1`] = `
      
     <ul
       class="dropdown-menu notification-dropdown"
-      style="display: none;"
     >
-      <li>
-        <a
-          class="btn disabled"
-        >
-          
-        Mark all as read
-      
-        </a>
-      </li>
+      <!---->
+       
+      <!---->
        
       <!---->
        
       <!---->
        
-      <li
-        class="divider"
-        role="separator"
-      />
+      <!---->
         
       <li
         class="progress"
@@ -136,7 +116,7 @@ exports[`Storyshots Global component With Errors 1`] = `
             class="sr-only"
           >
             
-          Loading
+          Loading...
         
           </span>
         </div>
@@ -173,26 +153,16 @@ exports[`Storyshots Global component With Notifications 1`] = `
      
     <ul
       class="dropdown-menu notification-dropdown"
-      style="display: none;"
     >
-      <li>
-        <a
-          class="btn disabled"
-        >
-          
-        Mark all as read
-      
-        </a>
-      </li>
+      <!---->
+       
+      <!---->
        
       <!---->
        
       <!---->
        
-      <li
-        class="divider"
-        role="separator"
-      />
+      <!---->
         
       <li
         class="progress"
@@ -209,7 +179,7 @@ exports[`Storyshots Global component With Notifications 1`] = `
             class="sr-only"
           >
             
-          Loading
+          Loading...
         
           </span>
         </div>

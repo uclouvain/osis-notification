@@ -1,4 +1,31 @@
-from django.urls import reverse
+# ##############################################################################
+#
+#    OSIS stands for Open Student Information System. It's an application
+#    designed to manage the core business of higher education institutions,
+#    such as universities, faculties, institutes and professional schools.
+#    The core business involves the administration of students, teachers,
+#    courses, programs and so on.
+#
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    A copy of this license - GNU General Public License - is available
+#    at the root of the source code of this program.  If not,
+#    see http://www.gnu.org/licenses/.
+#
+# ##############################################################################
+
+from django.test import override_settings
+from django.shortcuts import resolve_url
 from django.utils.timezone import now
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -9,12 +36,13 @@ from osis_notification.models.enums import NotificationStates
 from osis_notification.tests.factories import WebNotificationFactory
 
 
+@override_settings(ROOT_URLCONF="osis_notification.api.urls_v1")
 class SentNotificationListViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.person = PersonFactory()
         cls.web_notification = WebNotificationFactory(person=cls.person)
-        cls.url = reverse("osis_notification:notification-list")
+        cls.url = resolve_url("notification-list")
 
     def setUp(self):
         self.client.force_authenticate(user=self.person.user)
@@ -26,11 +54,11 @@ class SentNotificationListViewTest(APITestCase):
     def test_only_return_users_sent_notifications(self):
         response = self.client.get(self.url)
         # As the notification has not yet been sent, we should not retrieve it
-        self.assertEqual(response.data["count"], 0)
+        self.assertEqual(response.json()["count"], 0)
         self.web_notification.state = NotificationStates.SENT_STATE.name
         self.web_notification.save()
         response = self.client.get(self.url)
-        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.json()["count"], 1)
 
     def test_only_return_users_notifications(self):
         self.web_notification.state = NotificationStates.SENT_STATE.name
@@ -39,22 +67,20 @@ class SentNotificationListViewTest(APITestCase):
         web_notification.state = NotificationStates.SENT_STATE.name
         web_notification.save()
         response = self.client.get(self.url)
-        self.assertEqual(response.data["count"], 2)
+        self.assertEqual(response.json()["count"], 2)
         WebNotificationFactory()
         response = self.client.get(self.url)
-        # the result should be the same as the notification is for an other person
-        self.assertEqual(response.data["count"], 2)
+        # the result should be the same as the notification is for another person
+        self.assertEqual(response.json()["count"], 2)
 
 
+@override_settings(ROOT_URLCONF="osis_notification.api.urls_v1")
 class MarkNotificationAsReadViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.person = PersonFactory()
         cls.web_notification = WebNotificationFactory(person=cls.person)
-        cls.url = reverse(
-            "osis_notification:notification-mark-as-read",
-            kwargs={"notification_uuid": cls.web_notification.uuid},
-        )
+        cls.url = resolve_url("notification-mark-as-read", notification_uuid=cls.web_notification.uuid)
 
     def setUp(self):
         self.client.force_authenticate(user=self.person.user)
@@ -69,8 +95,8 @@ class MarkNotificationAsReadViewTest(APITestCase):
         self.assertIsNone(self.web_notification.read_at)
         response = self.client.patch(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["state"], NotificationStates.READ_STATE.name)
-        self.assertIsNotNone(response.data["read_at"])
+        self.assertEqual(response.json()["state"], NotificationStates.READ_STATE.name)
+        self.assertIsNotNone(response.json()["read_at"])
 
     def test_allow_user_to_mark_his_notification_as_unread(self):
         self.web_notification.state = NotificationStates.READ_STATE.name
@@ -78,21 +104,17 @@ class MarkNotificationAsReadViewTest(APITestCase):
         self.web_notification.save()
         response = self.client.patch(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["state"], NotificationStates.SENT_STATE.name)
-        self.assertIsNone(response.data["read_at"])
+        self.assertEqual(response.json()["state"], NotificationStates.SENT_STATE.name)
+        self.assertIsNone(response.json()["read_at"])
 
     def test_disallow_user_to_mark_others_users_notification_as_read(self):
         person = PersonFactory()
         web_notification = WebNotificationFactory(person=person)
-        response = self.client.patch(
-            reverse(
-                "osis_notification:notification-mark-as-read",
-                kwargs={"notification_uuid": web_notification.uuid},
-            )
-        )
+        response = self.client.patch(resolve_url("notification-mark-as-read", notification_uuid=web_notification.uuid))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
+@override_settings(ROOT_URLCONF="osis_notification.api.urls_v1")
 class MarkAllNotificationsAsReadViewTest(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -104,23 +126,19 @@ class MarkAllNotificationsAsReadViewTest(APITestCase):
             web_notification.state = NotificationStates.SENT_STATE.name
             web_notification.sent_at = now()
             web_notification.save()
-        cls.url = reverse("osis_notification:notification-mark-all-as-read")
+        cls.url = resolve_url("notification-mark-all-as-read")
 
     def setUp(self):
         self.client.force_authenticate(user=self.person.user)
 
     def test_allow_user_to_mark_all_his_notifications_as_read(self):
         self.assertEqual(
-            WebNotification.objects.filter(
-                state=NotificationStates.SENT_STATE.name
-            ).count(),
+            WebNotification.objects.filter(state=NotificationStates.SENT_STATE.name).count(),
             self.sent_notification_count,
         )
         response = self.client.put(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            WebNotification.objects.filter(
-                state=NotificationStates.READ_STATE.name
-            ).count(),
+            WebNotification.objects.filter(state=NotificationStates.READ_STATE.name).count(),
             self.sent_notification_count,
         )

@@ -45,10 +45,9 @@
       </div>
     </a>
     <ul
-        v-show="notifications.length"
         class="dropdown-menu notification-dropdown"
     >
-      <li>
+      <li v-if="!loading && notifications.length">
         <a
             class="btn"
             :class="{ disabled: !unreadNotificationsCount }"
@@ -71,9 +70,15 @@
         </div>
       </li>
       <li
+          v-if="!loading && notifications.length"
           role="separator"
           class="divider"
       />
+      <li
+          v-if="!loading && !notifications.length"
+      >
+        {{ $t('notification_viewer.no_notifications') }}
+      </li>
       <Notification
           v-for="notification in notifications"
           :key="notification.uuid"
@@ -97,7 +102,7 @@
             style="width: 100%"
         >
           <span class="sr-only">
-            Loading
+            {{ $t('notification_viewer.loading') }}
           </span>
         </div>
       </li>
@@ -125,7 +130,7 @@ export default {
   name: 'NotificationViewer',
   components: { Notification },
   props: {
-    url: {
+    baseUrl: {
       type: String,
       required: true,
     },
@@ -163,7 +168,7 @@ export default {
   methods: {
     fetchNotifications: async function () {
       try {
-        const response = await fetch(`${this.url}?limit=${this.pageSize}`);
+        const response = await fetch(`${this.baseUrl}?limit=${this.pageSize}`);
         const newNotifications = await response.json();
         if (newNotifications.count) {
           this.animationEnabled = true;
@@ -179,7 +184,7 @@ export default {
     },
     toggleState: async function (uuid) {
       try {
-        const response = await fetch(`${this.url}${uuid}`, {
+        const response = await fetch(`${this.baseUrl}${uuid}`, {
           method: 'PATCH',
           headers: {'X-CSRFToken': getCookie('csrftoken')},
         });
@@ -207,7 +212,7 @@ export default {
     },
     markAllAsRead: async function () {
       try {
-        const response = await fetch(`${this.url}mark_all_as_read`, {
+        const response = await fetch(`${this.baseUrl}mark_all_as_read`, {
           method: 'PUT',
           headers: {'X-CSRFToken': getCookie('csrftoken')},
         });

@@ -37,6 +37,8 @@ const messages = {
       error_mark_all_as_read: 'An error occurred while marking all the notifications as read, please try again later.',
       error_fetch_notifications: 'An error occurred while fetching notifications, please try again later.',
       load_more: 'Load more',
+      loading: 'Loading...',
+      no_notifications: 'No notifications.',
     },
     notification: {
       mark_as_read: 'Mark as read',
@@ -52,6 +54,8 @@ const messages = {
       error_mark_all_as_read: 'Une erreur s\'est produite lors du marquage des notifications comme lues, veuillez réessayer plus tard.',
       error_fetch_notifications: 'Une erreur s\'est produite lors de la récupération des notifications, veuillez réessayer plus tard.',
       load_more: 'Afficher plus',
+      loading: 'Chargement...',
+      no_notifications: 'Pas de notifications.',
     },
     notification: {
       mark_as_read: 'Marquer comme lu',
