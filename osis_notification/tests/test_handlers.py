@@ -6,15 +6,12 @@ from django.test import TestCase
 
 from base.tests.factories.person import PersonFactory
 from osis_common.models import message_history
-from osis_notification.contrib.handlers import (
-    WebNotificationHandler,
-    EmailNotificationHandler,
-)
+from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
 from osis_notification.contrib.notification import (
     EmailNotification as EmailNotificationType,
     WebNotification as WebNotificationType,
 )
-from osis_notification.models import WebNotification, EmailNotification
+from osis_notification.models import EmailNotification, WebNotification
 from osis_notification.models.enums import NotificationStates
 from osis_notification.tests.factories import WebNotificationFactory
 
@@ -29,7 +26,7 @@ class HandlersTest(TestCase):
         cls.web_notification = WebNotificationType(**cls.web_notification_data)
         cls.email_notification_data = {
             "recipient": PersonFactory(),
-            "subject": "Email notification test subject",
+            "subject": "Email notification test subject with a very long text to make sure we don't have newlines",
             "plain_text_content": "Email notification test content as plain text",
             "html_content": "<b>Email notification</b> test content as <i>html</i>",
         }
@@ -39,21 +36,15 @@ class HandlersTest(TestCase):
         web_notifications_count = WebNotification.objects.count()
         web_notification = WebNotificationHandler.create(self.web_notification)
         self.assertEqual(WebNotification.objects.count(), web_notifications_count + 1)
-        self.assertEqual(
-            web_notification.person, self.web_notification_data["recipient"]
-        )
-        self.assertEqual(
-            web_notification.payload, self.web_notification_data["content"]
-        )
+        self.assertEqual(web_notification.person, self.web_notification_data["recipient"])
+        self.assertEqual(web_notification.payload, self.web_notification_data["content"])
 
     def test_email_notification_handler_creates_object_with_correct_values(self):
         email_message = EmailNotificationHandler.build(self.email_notification)
         EmailNotificationHandler.create(email_message)
         self.assertEqual(EmailNotification.objects.count(), 1)
         email_notification = EmailNotification.objects.get()
-        self.assertEqual(
-            email_notification.person, self.email_notification_data["recipient"]
-        )
+        self.assertEqual(email_notification.person, self.email_notification_data["recipient"])
         email_message = email.message_from_string(email_notification.payload)
         self.assertTrue(email_message.is_multipart())
         # Now check the payload of each part (plain text and html)
@@ -97,9 +88,7 @@ class HandlersTest(TestCase):
         self.assertEqual(message_history.MessageHistory.objects.count(), 0)
         email_message = EmailNotificationHandler.build(self.email_notification)
         email_notification = EmailNotificationHandler.create(email_message, self.email_notification_data['recipient'])
-        self.assertEqual(
-            email_notification.state, NotificationStates.PENDING_STATE.name
-        )
+        self.assertEqual(email_notification.state, NotificationStates.PENDING_STATE.name)
         self.assertIsNone(email_notification.sent_at)
         EmailNotificationHandler.process(email_notification)
         email_notification.refresh_from_db()
