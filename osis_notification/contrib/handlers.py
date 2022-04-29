@@ -1,4 +1,5 @@
 import email
+from email.policy import default as default_policy
 from email.message import EmailMessage
 from html import unescape
 from typing import Optional
@@ -27,7 +28,7 @@ class EmailNotificationHandler:
             notification to be send
         :return: The built EmailMessage."""
 
-        mail = EmailMessage()
+        mail = EmailMessage(policy=default_policy.clone(max_line_length=None))
         mail.set_charset(settings.DEFAULT_CHARSET)
         # Set plain text content
         mail.set_content(notification.plain_text_content)
