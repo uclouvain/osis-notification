@@ -1,6 +1,7 @@
 import email
-from email.policy import default as default_policy
+from email.header import decode_header, make_header
 from email.message import EmailMessage
+from email.policy import default as default_policy
 from html import unescape
 from typing import Optional
 
@@ -28,7 +29,7 @@ class EmailNotificationHandler:
             notification to be send
         :return: The built EmailMessage."""
 
-        mail = EmailMessage(policy=default_policy.clone(max_line_length=None))
+        mail = EmailMessage(policy=default_policy)
         mail.set_charset(settings.DEFAULT_CHARSET)
         # Set plain text content
         mail.set_content(notification.plain_text_content)
@@ -45,7 +46,7 @@ class EmailNotificationHandler:
         mail: EmailMessage,
         person: Optional[Person] = None,
     ) -> EmailNotification:
-        """Create a email notification from a python object and save it in the database.
+        """Create an email notification from a python object and save it in the database.
 
         :param mail: The email message to be send as a notification.
         :param person: The recipient of the notification.
@@ -56,7 +57,7 @@ class EmailNotificationHandler:
 
         return EmailNotification.objects.create(
             person=person,
-            payload=mail.as_string(),
+            payload=str(mail),
         )
 
     @staticmethod
@@ -65,7 +66,7 @@ class EmailNotificationHandler:
 
         :param notification: The notification to be send."""
 
-        email_message = email.message_from_string(notification.payload)
+        email_message = email.message_from_string(notification.payload, policy=default_policy)
         receiver = create_receiver(
             notification.person.id,
             notification.person.email,
@@ -74,20 +75,22 @@ class EmailNotificationHandler:
         plain_text_content = ''
         html_content = ''
         for part in email_message.walk():
+            # Mail payload is decoded to bytes then decode to utf8
             if part.get_content_type() == "text/plain":
-                plain_text_content = part.get_payload()
+                plain_text_content = part.get_payload(decode=True).decode(settings.DEFAULT_CHARSET)
             elif part.get_content_type() == "text/html":
-                html_content = part.get_payload()
+                html_content = part.get_payload(decode=True).decode(settings.DEFAULT_CHARSET)
 
+        subject = make_header(decode_header(email_message.get("subject")))
         for mail_sender_class in settings.MAIL_SENDER_CLASSES:
             MailSenderClass = import_string(mail_sender_class)
             mail_sender = MailSenderClass(
                 receivers=[receiver],
                 reference=None,
                 connected_user=None,
-                subject=unescape(strip_tags(email_message.get("subject"))),
-                message=plain_text_content,
-                html_message=html_content,
+                subject=unescape(strip_tags(str(subject))),
+                message=plain_text_content.rstrip(),
+                html_message=html_content.rstrip(),
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 attachment=None,
                 cc=None,
