@@ -23,7 +23,7 @@ class WebNotificationManager(models.Manager):
 
     def sent(self):
         """Return all the sent notifications, including all the read notifications."""
-        return self.order_by_sent_first().filter(
+        return self.order_by("-created_at").filter(
             state__in=[
                 NotificationStates.SENT_STATE.name,
                 NotificationStates.READ_STATE.name,
