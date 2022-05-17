@@ -43,7 +43,7 @@ class SentNotificationListView(CorsAllowOriginMixin, generics.ListAPIView):
         )
 
     def get_queryset(self):
-        return WebNotification.objects.sent().filter(person__uuid=self.request.user.person.uuid)
+        return WebNotification.objects.sent().filter(person_id=self.request.user.person.pk)
 
 
 class MarkNotificationAsReadView(CorsAllowOriginMixin, generics.UpdateAPIView):

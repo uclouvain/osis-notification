@@ -30,7 +30,6 @@
         :checked="isSent"
         type="radio"
         data-toggle="tooltip"
-        data-placement="top"
         :data-original-title="isSent ? $t('notification.mark_as_read') : $t('notification.mark_as_unread')"
         @click.prevent="$emit('toggle', uuid)"
     >
@@ -83,7 +82,11 @@ export default {
   },
   mounted() {
     // activate the tooltips
-    jQuery('[data-toggle="tooltip"]').tooltip();
+    jQuery('[data-toggle="tooltip"]').tooltip({
+      placement: 'top',
+      container: 'body',
+      template: '<div class="tooltip tooltip-notification" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
+    });
   },
   updated() {
     // Show the bootstrap input radio tooltip
@@ -99,20 +102,26 @@ export default {
   }
 
   .label {
-    margin-left: 10px;
+    margin-left: 1em;
+    margin-right: 1em;
+    margin-top: .2em;
+    float: left;
   }
 
   input[type=radio] {
     cursor: pointer;
-    margin-left: 15px;
-    margin-right: 15px;
+    float: left;
   }
 
   .notification-text {
     display: block;
     white-space: initial;
-    margin: 10px 10px 10px 55px;
+    margin: 1em 1em 1em 1.7em;
   }
+}
+
+.tooltip-notification .tooltip-inner {
+  width: auto;
 }
 
 .font-bold {
