@@ -82,6 +82,9 @@ class EmailNotificationHandler:
                 html_content = part.get_payload(decode=True).decode(settings.DEFAULT_CHARSET)
 
         subject = make_header(decode_header(email_message.get("subject")))
+        cc = email_message.get("Cc")
+        if cc:
+            cc = [Person(email=cc_email) for cc_email in cc.split(',')]
         for mail_sender_class in settings.MAIL_SENDER_CLASSES:
             MailSenderClass = import_string(mail_sender_class)
             mail_sender = MailSenderClass(
@@ -93,7 +96,7 @@ class EmailNotificationHandler:
                 html_message=html_content.rstrip(),
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 attachment=None,
-                cc=None,
+                cc=cc,
             )
             mail_sender.send_mail()
         notification.state = NotificationStates.SENT_STATE.name
