@@ -83,14 +83,15 @@ export default {
   mounted() {
     // activate the tooltips
     jQuery('[data-toggle="tooltip"]').tooltip({
+      trigger: 'hover',
       placement: 'top',
       container: 'body',
       template: '<div class="tooltip tooltip-notification" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>',
     });
   },
   updated() {
-    // Show the bootstrap input radio tooltip
-    jQuery(`#notification-${this.uuid}`).tooltip('show');
+    // hide the bootstrap input radio tooltip on click
+    jQuery(`#notification-${this.uuid}`).tooltip('hide');
   },
 };
 </script>
