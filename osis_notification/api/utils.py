@@ -50,7 +50,7 @@ def proxy_view(view_cls):
         url_for_remote_api = request.path
         url = settings.OSIS_NOTIFICATION_BASE_URL + url_for_remote_api.replace(local_base_url, '')
         headers = {
-            'accept_language': request.user.person.language or settings.LANGUAGE_CODE,
+            'accept-language': request.user.person.language or settings.LANGUAGE_CODE,
             'x-user-firstname': request.user.person.first_name or '',
             'x-user-lastname': request.user.person.last_name or '',
             'x-user-email': request.user.email or '',
