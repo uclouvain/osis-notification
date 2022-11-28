@@ -23,6 +23,7 @@ class NotificationAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'type',
+        'state',
     )
     search_fields = (
         'uuid',
