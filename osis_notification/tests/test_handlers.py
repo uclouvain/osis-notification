@@ -1,7 +1,34 @@
+# ##############################################################################
+#
+#  OSIS stands for Open Student Information System. It's an application
+#  designed to manage the core business of higher education institutions,
+#  such as universities, faculties, institutes and professional schools.
+#  The core business involves the administration of students, teachers,
+#  courses, programs and so on.
+#
+#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  A copy of this license - GNU General Public License - is available
+#  at the root of the source code of this program.  If not,
+#  see http://www.gnu.org/licenses/.
+#
+# ##############################################################################
+
 from email.message import EmailMessage
 from unittest.mock import ANY, patch
 
 from django.conf import settings
+from django.db import IntegrityError
 from django.test import TestCase, override_settings
 
 from base.tests.factories.person import PersonFactory
@@ -38,6 +65,10 @@ class HandlersTest(TestCase):
         }
         cls.email_notification = EmailNotificationType(**cls.email_notification_data)
 
+    def test_web_notification_without_person_is_not_allowed(self):
+        with self.assertRaises(IntegrityError):
+            WebNotification.objects.create(payload="Foobar")
+
     def test_web_notification_handler_creates_object_with_correct_values(self):
         web_notifications_count = WebNotification.objects.count()
         web_notification = WebNotificationHandler.create(self.web_notification)
@@ -52,7 +83,8 @@ class HandlersTest(TestCase):
         EmailNotificationHandler.create(email_message)
         self.assertEqual(EmailNotification.objects.count(), 1)
         email_notification = EmailNotification.objects.get()
-        self.assertEqual(email_notification.person, self.email_notification_data["recipient"])
+        recipient = self.email_notification_data["recipient"]
+        self.assertEqual(email_notification.person, recipient)
         self.assertTrue(email_message.is_multipart())
         EmailNotificationHandler.process(email_notification)
 
@@ -61,7 +93,49 @@ class HandlersTest(TestCase):
             subject=self.email_notification_data["subject"],
             message=self.email_notification_data["plain_text_content"],
             html_message=self.email_notification_data["html_content"],
-            receivers=ANY,
+            receivers=[
+                {
+                    'receiver_person_id': recipient.pk,
+                    'receiver_email': recipient.email,
+                    'receiver_lang': recipient.language,
+                }
+            ],
+            reference=ANY,
+            connected_user=ANY,
+            from_email=ANY,
+            attachment=ANY,
+            cc=ANY,
+        )
+
+    @override_settings(MAIL_SENDER_CLASSES=['osis_notification.tests.test_handlers.DummyMailSender'])
+    @patch('osis_notification.tests.test_handlers.DummyMailSender')
+    def test_email_notification_handler_creates_object_with_correct_values_empty_person(self, sender_class):
+        email_notification_data = {
+            "recipient": "johndoe@example.org",
+            "subject": "Email notification test subject",
+            "plain_text_content": "Email notification test as plain text",
+            "html_content": "<b>Email notification</b> test content as <i>html</i>",
+        }
+        email_notification = EmailNotificationType(**email_notification_data)
+        email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(email_message)
+        self.assertEqual(EmailNotification.objects.count(), 1)
+
+        email_notification = EmailNotification.objects.get()
+        EmailNotificationHandler.process(email_notification)
+
+        # Now check the payload of each part (plain text and html)
+        sender_class.assert_called_with(
+            subject=email_notification_data["subject"],
+            message=email_notification_data["plain_text_content"],
+            html_message=email_notification_data["html_content"],
+            receivers=[
+                {
+                    'receiver_person_id': None,
+                    'receiver_email': "johndoe@example.org",
+                    'receiver_lang': settings.LANGUAGE_CODE,
+                }
+            ],
             reference=ANY,
             connected_user=ANY,
             from_email=ANY,

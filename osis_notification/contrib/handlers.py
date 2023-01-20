@@ -49,10 +49,10 @@ from osis_notification.models.enums import NotificationStates
 class EmailNotificationHandler:
     @staticmethod
     def build(notification: EmailNotificationType) -> EmailMessage:
-        """Build a EmailMessage object from a EmailNotification object.
+        """Build an EmailMessage object from a EmailNotification object.
 
-        :param notification: A EmailNotification object describing the email
-            notification to be send
+        :param notification: An EmailNotification object describing the email
+            notification to be sent
         :return: The built EmailMessage."""
 
         mail = EmailMessage(policy=default_policy)
@@ -63,7 +63,9 @@ class EmailNotificationHandler:
         mail.add_alternative(notification.html_content, subtype="html")
         mail["Subject"] = notification.subject
         mail["From"] = settings.DEFAULT_FROM_EMAIL
-        mail["To"] = notification.recipient.email
+        mail["To"] = (
+            notification.recipient.email if isinstance(notification.recipient, Person) else notification.recipient
+        )
 
         return mail
 
@@ -74,12 +76,12 @@ class EmailNotificationHandler:
     ) -> EmailNotification:
         """Create an email notification from a python object and save it in the database.
 
-        :param mail: The email message to be send as a notification.
+        :param mail: The email message to be sent as a notification.
         :param person: The recipient of the notification.
         :return: The created EmailNotification."""
 
         if person is None:
-            person = Person.objects.get(email=mail["To"])
+            person = Person.objects.filter(email=mail["To"]).first()
 
         return EmailNotification.objects.create(
             person=person,
@@ -90,12 +92,12 @@ class EmailNotificationHandler:
     def process(notification: EmailNotification):
         """Process the notification by sending the email.
 
-        :param notification: The notification to be send."""
+        :param notification: The notification to be sent."""
 
         email_message = email.message_from_string(notification.payload, policy=default_policy)
         receiver = create_receiver(
-            notification.person.id,
-            notification.person.email,
+            notification.person_id,
+            email_message.get("to"),
             settings.LANGUAGE_CODE,
         )
         plain_text_content = ''
