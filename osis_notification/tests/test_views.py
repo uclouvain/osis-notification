@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -36,8 +36,14 @@ from osis_notification.models.enums import NotificationStates
 from osis_notification.tests.factories import WebNotificationFactory
 
 
+class NotificationTestCase(APITestCase):
+    def assertNumQueries(self, num, func=None, *args, **kwargs):
+        # 2 being SAVEPOINT and RELEASE SAVEPOINT
+        return super().assertNumQueries(num + 2, func, *args, **kwargs)
+
+
 @override_settings(ROOT_URLCONF="osis_notification.api.urls_v1")
-class SentNotificationListViewTest(APITestCase):
+class SentNotificationListViewTest(NotificationTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.person = PersonFactory()
@@ -48,16 +54,19 @@ class SentNotificationListViewTest(APITestCase):
         self.client.force_authenticate(user=self.person.user)
 
     def test_allow_user_to_retrieve_his_notifications(self):
-        response = self.client.get(self.url)
+        with self.assertNumQueries(1):
+            response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_only_return_users_sent_notifications(self):
-        response = self.client.get(self.url)
+        with self.assertNumQueries(1):
+            response = self.client.get(self.url)
         # As the notification has not yet been sent, we should not retrieve it
         self.assertEqual(response.json()["count"], 0)
         self.web_notification.state = NotificationStates.SENT_STATE.name
         self.web_notification.save()
-        response = self.client.get(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.get(self.url)
         self.assertEqual(response.json()["count"], 1)
 
     def test_only_return_users_notifications(self):
@@ -66,16 +75,18 @@ class SentNotificationListViewTest(APITestCase):
         web_notification = WebNotificationFactory(person=self.person)
         web_notification.state = NotificationStates.SENT_STATE.name
         web_notification.save()
-        response = self.client.get(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.get(self.url)
         self.assertEqual(response.json()["count"], 2)
         WebNotificationFactory()
-        response = self.client.get(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.get(self.url)
         # the result should be the same as the notification is for another person
         self.assertEqual(response.json()["count"], 2)
 
 
 @override_settings(ROOT_URLCONF="osis_notification.api.urls_v1")
-class MarkNotificationAsReadViewTest(APITestCase):
+class MarkNotificationAsReadViewTest(NotificationTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.person = PersonFactory()
@@ -86,14 +97,16 @@ class MarkNotificationAsReadViewTest(APITestCase):
         self.client.force_authenticate(user=self.person.user)
 
     def test_mark_as_read_a_notification_that_is_not_sent_raises_a_404(self):
-        response = self.client.patch(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.patch(self.url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_allow_user_to_mark_his_notification_as_read(self):
         self.web_notification.state = NotificationStates.SENT_STATE.name
         self.web_notification.save()
         self.assertIsNone(self.web_notification.read_at)
-        response = self.client.patch(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.patch(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["state"], NotificationStates.READ_STATE.name)
         self.assertIsNotNone(response.json()["read_at"])
@@ -102,7 +115,8 @@ class MarkNotificationAsReadViewTest(APITestCase):
         self.web_notification.state = NotificationStates.READ_STATE.name
         self.web_notification.read_at = now()
         self.web_notification.save()
-        response = self.client.patch(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.patch(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["state"], NotificationStates.SENT_STATE.name)
         self.assertIsNone(response.json()["read_at"])
@@ -110,12 +124,13 @@ class MarkNotificationAsReadViewTest(APITestCase):
     def test_disallow_user_to_mark_others_users_notification_as_read(self):
         person = PersonFactory()
         web_notification = WebNotificationFactory(person=person)
-        response = self.client.patch(resolve_url("notification-mark-as-read", notification_uuid=web_notification.uuid))
+        with self.assertNumQueries(2):
+            response = self.client.patch(resolve_url("notification-mark-as-read", notification_uuid=web_notification.uuid))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 @override_settings(ROOT_URLCONF="osis_notification.api.urls_v1")
-class MarkAllNotificationsAsReadViewTest(APITestCase):
+class MarkAllNotificationsAsReadViewTest(NotificationTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.person = PersonFactory()
@@ -136,7 +151,8 @@ class MarkAllNotificationsAsReadViewTest(APITestCase):
             WebNotification.objects.filter(state=NotificationStates.SENT_STATE.name).count(),
             self.sent_notification_count,
         )
-        response = self.client.put(self.url)
+        with self.assertNumQueries(2):
+            response = self.client.put(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             WebNotification.objects.filter(state=NotificationStates.READ_STATE.name).count(),
