@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0647_merge_20230113_1039'),
+        ('base', '0001_initial'),
         ('osis_notification', '0001_initial'),
     ]
 
