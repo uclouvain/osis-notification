@@ -1,4 +1,3 @@
-
 /*
  *
  *   OSIS stands for Open Student Information System. It's an application
@@ -24,24 +23,28 @@
  *   see http://www.gnu.org/licenses/.
  *
  */
+/* eslint-disable vue/prefer-import-from-vue */
+import {createApp} from '@vue/runtime-dom'; // to allow to be spied on
+import NotificationViewer from './NotificationViewer.vue';
+import {i18n} from './i18n';
 
-
-/**
- * Get the given cookie from it's name. We use it to get the csrftoken.
- * See code from https://docs.djangoproject.com/en/3.2/ref/csrf/#acquiring-the-token-if-csrf-use-sessions-and-csrf-cookie-httponly-are-false
- */
-export function getCookie (name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      // Does this cookie string begin with the name we want?
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
+interface Props extends Record<string, unknown> {
+  baseUrl: string,
+  interval?: number,
+  limit?: number,
+  trtruncateLength?: number,
 }
+
+document.querySelectorAll<HTMLElement>('#notification-viewer').forEach((elem) => {
+  const props: Props = {baseUrl: "", ...elem.dataset};
+  if (elem.dataset.interval) {
+    props.interval = Number.parseInt(elem.dataset.interval);
+  }
+  if (elem.dataset.limit) {
+    props.limit = Number.parseInt(elem.dataset.limit);
+  }
+  if (elem.dataset.truncateLength) {
+    props.truncateLength = Number.parseInt(elem.dataset.truncateLength);
+  }
+  createApp(NotificationViewer, props).use(i18n).mount(elem);
+});

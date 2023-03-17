@@ -34,25 +34,32 @@
         @click.prevent="$emit('toggle', uuid)"
     >
     <span class="label label-primary">{{ sentAt }}</span>
-    <truncate
-        action-class="btn btn-link"
-        class="notification-text"
-        type="html"
-        :class="{ 'font-bold': isSent }"
-        :clamp="$t('notification.show_more')"
+    <TruncateHtml
+        button-css-class="btn btn-link"
+        container-css-class="notification-text"
+        :content-css-class="isSent ? 'font-bold' : ''"
+        :html-text="payload"
         :length="truncateLength"
-        :less="$t('notification.show_less')"
-        :text="payload"
+        :less-button-text="$t('notification.show_less')"
+        :more-button-text="$t('notification.show_more')"
     />
   </li>
 </template>
 
-<script>
-import truncate from 'vue-truncate-collapsed';
+<script lang="ts">
+import TruncateHtml from './TruncateHtml.vue';
+import {defineComponent} from "vue";
+import type jQuery from "jquery";
 
-export default {
-  name: 'Notification',
-  components: { truncate },
+declare global {
+  interface Window {
+    jQuery: typeof jQuery;
+  }
+}
+
+export default defineComponent({
+  name: 'NotificationEntry',
+  components: {TruncateHtml},
   props: {
     uuid: {
       type: String,
@@ -75,6 +82,7 @@ export default {
       default: 60,
     },
   },
+  emits: ['toggle'],
   computed: {
     isSent: function () {
       return this.state === 'SENT_STATE';
@@ -82,7 +90,7 @@ export default {
   },
   mounted() {
     // activate the tooltips
-    jQuery('[data-toggle="tooltip"]').tooltip({
+    window.jQuery('[data-toggle="tooltip"]').tooltip({
       trigger: 'hover',
       placement: 'top',
       container: 'body',
@@ -91,9 +99,13 @@ export default {
   },
   updated() {
     // hide the bootstrap input radio tooltip on click
-    jQuery(`#notification-${this.uuid}`).tooltip('hide');
+    window.jQuery(`#notification-${this.uuid}`).tooltip('hide');
   },
-};
+  beforeUnmount() {
+    // hide the bootstrap input radio tooltip on click
+    window.jQuery(`#notification-${this.uuid}`).tooltip('destroy');
+  },
+});
 </script>
 
 <style lang="scss">
@@ -118,6 +130,10 @@ export default {
     display: block;
     white-space: initial;
     margin: 1em 1em 1em 1.7em;
+  }
+
+  .notification-text > div.truncated {
+    display: inline;
   }
 }
 

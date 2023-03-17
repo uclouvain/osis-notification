@@ -45,6 +45,7 @@ from osis_notification.contrib.notification import (
 from osis_notification.models import EmailNotification, WebNotification
 from osis_notification.models.enums import NotificationStates
 
+UNKNOWN_PERSON = object()
 
 class EmailNotificationHandler:
     @staticmethod
@@ -72,7 +73,7 @@ class EmailNotificationHandler:
     @staticmethod
     def create(
         mail: EmailMessage,
-        person: Optional[Person] = None,
+        person: Optional[Person] = UNKNOWN_PERSON,
     ) -> EmailNotification:
         """Create an email notification from a python object and save it in the database.
 
@@ -80,7 +81,7 @@ class EmailNotificationHandler:
         :param person: The recipient of the notification.
         :return: The created EmailNotification."""
 
-        if person is None:
+        if person is UNKNOWN_PERSON:
             person = Person.objects.filter(email=mail["To"]).first()
 
         return EmailNotification.objects.create(

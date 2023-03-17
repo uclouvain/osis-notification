@@ -24,12 +24,13 @@
  *
  */
 
-import { getCookie } from './utils.js';
+import {getCookie} from './utils.js';
+import {describe, it, expect} from 'vitest';
 
 describe('cookies are not set', () => {
   it('should return null', () => {
-    delete window.document.cookie;
-    expect(getCookie('csrf')).toEqual(null);
+    window.document.cookie = '';
+    expect(() => getCookie('csrf')).toThrowError();
   });
 });
 
@@ -41,6 +42,6 @@ describe('cookies are set', () => {
     });
     expect(getCookie('csrf')).toEqual('1234-5678-9101-1121-3141');
     expect(getCookie('anotherCookie')).toEqual('value');
-    expect(getCookie('thisCookieDoesNotExists')).toEqual(null);
+    expect(() => getCookie('thisCookieDoesNotExists')).toThrowError();
   });
 });

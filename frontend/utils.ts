@@ -23,23 +23,22 @@
  *   see http://www.gnu.org/licenses/.
  *
  */
-import Vue from 'vue';
-import NotificationViewer from './NotificationViewer';
-import { i18n } from './i18n';
 
-document.querySelectorAll('#notification-viewer').forEach((elem) => {
-  const props = { ...elem.dataset };
-  if (typeof props.interval !== 'undefined') {
-    props.interval = Number.parseInt(props.interval);
+
+/**
+ * Get the given cookie from its name. We use it to get the csrftoken.
+ * See code from https://docs.djangoproject.com/en/3.2/ref/csrf/#acquiring-the-token-if-csrf-use-sessions-and-csrf-cookie-httponly-are-false
+ */
+export function getCookie(name: string): string {
+  if (document.cookie) {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        return decodeURIComponent(cookie.substring(name.length + 1));
+      }
+    }
   }
-  if (typeof props.limit !== 'undefined') {
-    props.limit = Number.parseInt(props.limit);
-  }
-  if (typeof props.truncateLength !== 'undefined') {
-    props.truncateLength = Number.parseInt(props.truncateLength);
-  }
-  new Vue({
-    render: (h) => h(NotificationViewer, { props }),
-    i18n,
-  }).$mount(elem);
-});
+  throw new Error(`No such cookie ${name}`);
+}

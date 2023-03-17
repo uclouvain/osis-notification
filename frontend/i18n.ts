@@ -24,18 +24,13 @@
  *
  */
 
-import Vue from 'vue';
-import VueI18n from 'vue-i18n';
-
-Vue.use(VueI18n);
+import {createI18n} from 'vue-i18n';
 
 const messages = {
   en: {
     notification_viewer: {
       mark_all_as_read: 'Mark all as read',
-      error_mark_as_read: 'An error occurred while marking the notification as read, please try again later.',
-      error_mark_all_as_read: 'An error occurred while marking all the notifications as read, please try again later.',
-      error_fetch_notifications: 'An error occurred while fetching notifications, please try again later.',
+      error: 'An error occurred, please try again later.',
       load_more: 'Load more',
       loading: 'Loading...',
       no_notifications: 'No notifications.',
@@ -50,9 +45,7 @@ const messages = {
   'fr-be': {
     notification_viewer: {
       mark_all_as_read: 'Tout marquer comme lu',
-      error_mark_as_read: 'Une erreur s\'est produite lors du marquage de la notification comme lue, veuillez réessayer plus tard.',
-      error_mark_all_as_read: 'Une erreur s\'est produite lors du marquage des notifications comme lues, veuillez réessayer plus tard.',
-      error_fetch_notifications: 'Une erreur s\'est produite lors de la récupération des notifications, veuillez réessayer plus tard.',
+      error: 'Une erreur s\'est produite, veuillez réessayer plus tard.',
       load_more: 'Afficher plus',
       loading: 'Chargement...',
       no_notifications: 'Pas de notifications.',
@@ -65,7 +58,7 @@ const messages = {
     },
   },
 };
-export const i18n = new VueI18n({
+export const i18n = createI18n({
   locale: document.documentElement.lang || 'en',
   messages,
 });
