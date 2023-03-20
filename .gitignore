@@ -130,6 +130,5 @@ dmypy.json
 
 # Frontend related
 /node_modules
-/osis_notification/static/osis_notification/osis-notification.common.*
-/osis_notification/static/osis_notification/osis-notification.umd.js*
+/frontend/node_modules
 /coverage

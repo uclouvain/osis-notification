@@ -79,7 +79,7 @@
       >
         {{ $t('notification_viewer.no_notifications') }}
       </li>
-      <Notification
+      <NotificationEntry
           v-for="notification in notifications"
           :key="notification.uuid"
           :uuid="notification.uuid"
@@ -122,13 +122,21 @@
   </li>
 </template>
 
-<script>
-import Notification from './components/Notification';
-import { getCookie } from './utils';
+<script lang="ts">
+import NotificationEntry from './components/NotificationEntry.vue';
+import {getCookie} from './utils';
+import {defineComponent} from "vue";
+import type {EntriesResponse, EntryRecord} from "./interfaces";
 
-export default {
+declare global {
+  interface Window {
+    jQuery: typeof jQuery;
+  }
+}
+
+export default defineComponent({
   name: 'NotificationViewer',
-  components: { Notification },
+  components: {NotificationEntry},
   props: {
     baseUrl: {
       type: String,
@@ -149,82 +157,60 @@ export default {
   },
   data() {
     return {
-      notifications: [],
+      notifications: [] as EntryRecord[],
       hasNextPage: false,
       animationEnabled: false,
       pageSize: this.limit,
       error: '',
       loading: true,
       unreadNotificationsCount: 0,
+      timer: 0,
+      csrfToken: getCookie('csrftoken'),
     };
   },
-  async mounted() {
-    await this.fetchNotifications();
-    this.timer = setInterval(this.fetchNotifications, this.interval * 1000);
+  unmounted() {
+    window.clearTimeout(this.timer);
+  },
+  mounted() {
+    void this.fetchNotifications();
     // This next line let the dropdown menu open after clicking inside it. See the bootstrap source code here:
     // https://github.com/twbs/bootstrap/blob/0b9c4a4007c44201dce9a6cc1a38407005c26c86/js/dropdown.js#L160
     jQuery(document).on('click.bs.dropdown.data-api', '.notification-dropdown', e => e.stopPropagation());
   },
   methods: {
     fetchNotifications: async function () {
-      try {
-        const response = await fetch(`${this.baseUrl}?limit=${this.pageSize}`);
-        const newNotifications = await response.json();
-        if (newNotifications.count) {
-          this.animationEnabled = true;
-        }
-        this.notifications = newNotifications.results;
-        this.hasNextPage = !!newNotifications.next;
-        this.unreadNotificationsCount = newNotifications.unread_count;
-      } catch (error) {
-        this.error = `${this.$t('notification_viewer.error_fetch_notifications')} ( ${error.statusText} )`;
-      } finally {
-        this.loading = false;
+      const newNotifications = await this.doRequest(`?limit=${this.pageSize}`, {}, true) as EntriesResponse | null;
+      if (!newNotifications) return;
+      if (newNotifications.unread_count) {
+        this.animationEnabled = true;
       }
+      this.notifications = newNotifications.results;
+      this.hasNextPage = !!newNotifications.next;
+      this.unreadNotificationsCount = newNotifications.unread_count;
+      this.timer = window.setTimeout(() => void this.fetchNotifications(), this.interval * 1000);
     },
-    toggleState: async function (uuid) {
-      try {
-        const response = await fetch(`${this.baseUrl}${uuid}`, {
-          method: 'PATCH',
-          headers: {'X-CSRFToken': getCookie('csrftoken')},
-        });
-        if (response.status === 200) {
-          const notificationIndex = this.notifications.findIndex((notification) => notification.uuid === uuid);
-          const newNotification = await response.json();
-          this.$set(this.notifications, notificationIndex, newNotification);
-          // update unread notifications count
-          if (newNotification.state === 'SENT_STATE') {
-            this.unreadNotificationsCount++;
-          } else {
-            this.unreadNotificationsCount--;
-          }
-          // if all the notifications are read and there is still unread notification, fetch all the notifications
-          // to display the ones that are not read first.
-          if (this.notifications.filter(n => n.state === 'SENT_STATE').length !== this.unreadNotificationsCount) {
-            await this.fetchNotifications();
-          }
-        } else {
-          this.error = `${this.$t('notification_viewer.error_mark_as_read')}`;
-        }
-      } catch (error) {
-        this.error = `${this.$t('notification_viewer.error_mark_as_read')} ( ${error.statusText} )`;
+    toggleState: async function (uuid: string) {
+      const newNotification = await this.doRequest(uuid, {method: 'PATCH'}) as EntryRecord | null;
+      if (!newNotification) return;
+      const notificationIndex = this.notifications.findIndex((notification) => notification.uuid === uuid);
+      this.notifications[notificationIndex] = newNotification;
+      // update unread notifications count
+      if (newNotification.state === 'SENT_STATE') {
+        this.unreadNotificationsCount++;
+      } else {
+        this.unreadNotificationsCount--;
+      }
+      // if all the notifications are read and there is still unread notification, fetch all the notifications
+      // to display the ones that are not read first.
+      if (this.notifications.filter(n => n.state === 'SENT_STATE').length !== this.unreadNotificationsCount) {
+        await this.fetchNotifications();
       }
     },
     markAllAsRead: async function () {
-      try {
-        const response = await fetch(`${this.baseUrl}mark_all_as_read`, {
-          method: 'PUT',
-          headers: {'X-CSRFToken': getCookie('csrftoken')},
-        });
-        const notifications = await response.json();
-        if (response.status === 200 && notifications.length > 0) {
-          this.notifications.forEach(notification => notification.state = "READ_STATE");
-          this.unreadNotificationsCount = 0;
-        } else {
-          this.error = `${this.$t('notification_viewer.error_mark_all_as_read')}`;
-        }
-      } catch (error) {
-        this.error = `${this.$t('notification_viewer.error_mark_all_as_read')} ( ${error.statusText} )`;
+      const notifications = await this.doRequest('mark_all_as_read', {method: 'PUT'}) as EntryRecord[] | null;
+      if (notifications && notifications.length > 0) {
+        this.notifications.forEach(notification => notification.state = "READ_STATE");
+        this.unreadNotificationsCount = 0;
       }
     },
     /**
@@ -232,14 +218,36 @@ export default {
      * tasks and add the new ones. All this will be override by the setInterval that fetch all the async tasks if we
      * use the ?offset. So it may generate a big request, but it is very unlikely.
      */
-    loadMore: function (e) {
-       e.stopPropagation();
+    loadMore: async function (e: Event) {
+      e.stopPropagation();
       this.loading = true;
       this.pageSize += this.limit;
-      this.fetchNotifications();
+      await this.fetchNotifications();
+    },
+    doRequest: async function (url: string, params: object, loadingAnimation = false) {
+      loadingAnimation && (this.loading = true);
+      try {
+        const response = await fetch(`${this.baseUrl}${url}`, {
+          mode: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'X-CSRFToken': this.csrfToken,
+          },
+          ...params,
+        });
+        if (response.status >= 200 && response.status < 300) {
+          loadingAnimation && (this.loading = false);
+          return response.json();
+        } else {
+          this.error = `${this.$t('notification_viewer.error')}  (${response.statusText})`;
+        }
+      } catch (e) {
+        this.error = `${this.$t('notification_viewer.error')} (${(e as Error).message})`;
+      }
+      loadingAnimation && (this.loading = false);
     },
   },
-};
+});
 </script>
 
 <style lang="scss">
@@ -267,7 +275,8 @@ export default {
     color: #777;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
-  &::after {  // notification count
+
+  &::after { // notification count
     font-family: Arial sans-serif;
     font-size: 0.8em;
     font-weight: 700;
@@ -288,24 +297,44 @@ export default {
     color: #fff;
     z-index: 2;
   }
+
   &.notify span {
     animation: ring 1.5s ease;
     animation-iteration-count: infinite;
   }
+
   &.show-count::after {
     transform: scale(1);
     opacity: 1;
   }
+
   @keyframes ring {
-    0% { transform: rotate(35deg); }
-    12.5% { transform: rotate(-30deg); }
-    25% { transform: rotate(25deg); }
-    37.5% { transform: rotate(-20deg); }
-    50% { transform: rotate(15deg); }
-    62.5% { transform: rotate(-10deg); }
-    75% { transform: rotate(5deg); }
-    100% { transform: rotate(0deg); }
+    0% {
+      transform: rotate(35deg);
+    }
+    12.5% {
+      transform: rotate(-30deg);
+    }
+    25% {
+      transform: rotate(25deg);
+    }
+    37.5% {
+      transform: rotate(-20deg);
+    }
+    50% {
+      transform: rotate(15deg);
+    }
+    62.5% {
+      transform: rotate(-10deg);
+    }
+    75% {
+      transform: rotate(5deg);
+    }
+    100% {
+      transform: rotate(0deg);
+    }
   }
 }
+
 //-------------------------------------------------
 </style>

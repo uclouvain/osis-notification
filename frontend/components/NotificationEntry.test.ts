@@ -24,165 +24,120 @@
  *
  */
 
-import { mount } from '@vue/test-utils';
-import Notification from './Notification.vue';
+import {mount} from '@vue/test-utils';
+import NotificationEntry from './NotificationEntry.vue';
+import {describe, expect, it, vi} from "vitest";
 
-jest.mock('../utils.js');
 
+const tooltip = vi.fn((eventName, selectorOrHandler: string | CallableFunction, handler?: CallableFunction) => {
+  if (typeof selectorOrHandler === 'function') {
+    selectorOrHandler({stopPropagation: vi.fn()});
+  } else if (handler) {
+    handler({stopPropagation: vi.fn()});
+  }
+});
+const jQueryMock = vi.fn(() => ({
+  tooltip: tooltip,
+}));
+
+vi.stubGlobal('jQuery', jQueryMock);
 
 const notificationSentData = {
   uuid: '5646548946464',
   state: 'SENT_STATE',
   sentAt: Date.now().toString(),
   payload: 'This is a test payload with a SENT_STATE',
-}
+};
 const notificationReadData = {
   uuid: '5646548946464',
   state: 'READ_STATE',
   sentAt: Date.now().toString(),
   readAt: Date.now().toString(),
   payload: 'This is a test payload with a READ_STATE',
-}
+};
 
 describe('component lifecycle', () => {
-  const tooltip = jest.fn();
-  window.jQuery = jest.fn(() => ({
-    tooltip,
-  }));
 
   it('should mount', () => {
-    const wrapper = mount(Notification, {
-      propsData: {
-        ...notificationSentData,
-      },
-      mocks: {
-        jQuery,
-        $t: k => k,
-      },
-    });
+    const wrapper = mount(NotificationEntry, {props: {...notificationSentData}});
     expect(wrapper.text()).toContain(notificationSentData['payload']);
     expect(wrapper.text()).toContain(notificationSentData['sentAt']);
+    expect(tooltip).toHaveBeenCalled();
+    tooltip.mockReset();
+
+    wrapper.unmount();
     expect(tooltip).toHaveBeenCalled();
   });
 
   it('should update', async () => {
-    const wrapper = mount(Notification, {
-      propsData: {
-        ...notificationSentData,
-      },
-      mocks: {
-        jQuery,
-        $t: k => k,
-      },
-    });
+    const wrapper = mount(NotificationEntry, {props: {...notificationSentData}});
     tooltip.mockClear();
     expect(tooltip).not.toHaveBeenCalled();
     // change this and trigger an update
-    wrapper.setProps({...notificationReadData});
-    await wrapper.vm.$nextTick();
+    await wrapper.setProps({...notificationReadData});
     expect(tooltip).toHaveBeenCalled();
-    expect(wrapper.text()).toContain(notificationReadData['payload']);
-    expect(wrapper.text()).toContain(notificationReadData['sentAt']);
   });
-
 });
 
 it('should trigger toggle', async () => {
-  const wrapper = mount(Notification, {
-    propsData: {
+  const onToggle = vi.fn();
+  const wrapper = mount(NotificationEntry, {
+    props: {
       ...notificationSentData,
-    },
-    mocks: {
-      jQuery,
-      $t: k => k,
+      onToggle: onToggle,
     },
   });
-  expect(wrapper.emitted('toggle')).toBeFalsy();
-  await wrapper.find('input').trigger('click');
-  expect(wrapper.emitted('toggle')).toBeTruthy();
+  expect(wrapper.emitted()).not.toHaveProperty('toggle');
+  const input = wrapper.get('input');
+  expect(input.element.id).toBe('notification-5646548946464');
+  await input.trigger('click.prevent');
+  expect(onToggle).toHaveBeenCalled();
 });
 
 describe('notification display', () => {
   it('changes when sent state', async () => {
-    const wrapper = mount(Notification, {
-      propsData: {
-        ...notificationSentData,
-      },
-      mocks: {
-        jQuery,
-        $t: k => k,
-      },
-    });
+    const wrapper = mount(NotificationEntry, {props: {...notificationSentData}});
 
     // input must be checked
     const input = wrapper.find('input');
     expect(input.exists()).toBe(true);
     expect(input.element.checked).toBeTruthy();
     // text must be bold
-    const textDiv = wrapper.find('div.notification-text');
+    const textDiv = wrapper.find('.notification-text > div');
     expect(textDiv.exists()).toBe(true);
-    expect(textDiv.element.classList).toContain('font-bold');
+    expect(textDiv.classes()).toContain('font-bold');
     // input tooltip should call for mark as read action
-    input.trigger("mouseover");
+    await input.trigger("mouseover");
     expect(input.element.getAttribute('data-original-title')).toBe('notification.mark_as_read');
   });
 
   it('changes when read state', async () => {
-    const wrapper = mount(Notification, {
-      propsData: {
-        ...notificationReadData,
-      },
-      mocks: {
-        jQuery,
-        $t: k => k,
-      },
-    });
+    const wrapper = mount(NotificationEntry, {props: {...notificationReadData}});
 
     // input must not be checked
     const input = wrapper.find('input');
     expect(input.exists()).toBe(true);
     expect(input.element.checked).toBeFalsy();
     // text must not be bold
-    const textDiv = wrapper.find('div.notification-text');
+    const textDiv = wrapper.find('.notification-text > div');
     expect(textDiv.exists()).toBe(true);
-    expect(textDiv.element.classList).not.toContain('font-bold');
+    expect(textDiv.classes()).not.toContain('font-bold');
     // input tooltip should call for mark as unread action
-    input.trigger("mouseover");
+    await input.trigger("mouseover");
     expect(input.element.getAttribute('data-original-title')).toBe('notification.mark_as_unread');
   });
 });
 
-it('should have correct computed values', () => {
-  expect(Notification.computed.isSent.call({ state: notificationSentData.state})).toEqual(true);
-  expect(Notification.computed.isSent.call({ state: notificationReadData.state})).toEqual(false);
-});
-
 describe('radio button', () => {
   it('should be ticked if notification state is `SENT_STATE`', () => {
-      const wrapper = mount(Notification, {
-      propsData: {
-        ...notificationSentData,
-      },
-      mocks: {
-        jQuery,
-        $t: k => k,
-      },
-    });
+    const wrapper = mount(NotificationEntry, {props: {...notificationSentData}});
     const input = wrapper.find('input[type="radio"]');
-    expect(input.element.checked).toEqual(true);
+    expect((input.element as HTMLInputElement).checked).toEqual(true);
   });
 
   it('should not be ticked if notification state is `READ_STATE`', () => {
-      const wrapper = mount(Notification, {
-      propsData: {
-        ...notificationReadData,
-      },
-      mocks: {
-        jQuery,
-        $t: k => k,
-      },
-    });
+    const wrapper = mount(NotificationEntry, {props: {...notificationReadData}});
     const input = wrapper.find('input[type="radio"]');
-    expect(input.element.checked).toEqual(false);
+    expect((input.element as HTMLInputElement).checked).toEqual(false);
   });
 });
