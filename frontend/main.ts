@@ -32,7 +32,7 @@ interface Props extends Record<string, unknown> {
   baseUrl: string,
   interval?: number,
   limit?: number,
-  trtruncateLength?: number,
+  truncateLength?: number,
 }
 
 document.querySelectorAll<HTMLElement>('#notification-viewer').forEach((elem) => {
