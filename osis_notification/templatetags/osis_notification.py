@@ -37,7 +37,7 @@ def notification_viewer(**kwargs):
     for name, value in kwargs.items():
         attrs['data-' + "-".join(name.lower().split("_"))] = escapejs(value)
     return mark_safe(
-        '<div id="notification-viewer" {}></div>'.format(
+        '<li id="notification-viewer" class="dropdown" {}></li>'.format(
             " ".join('{}="{}"'.format(k, v) for k, v in attrs.items()),
         )
     )

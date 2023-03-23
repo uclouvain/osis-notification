@@ -24,100 +24,95 @@
   -
   -->
 <template>
-  <li
-      id="notification-viewer"
-      class="dropdown"
+  <a
+      class="dropdown-toggle"
+      data-toggle="dropdown"
+      role="button"
+      aria-haspopup="true"
+      aria-expanded="false"
+      @click="animationEnabled = false"
   >
-    <a
-        class="dropdown-toggle"
-        data-toggle="dropdown"
-        role="button"
-        aria-haspopup="true"
-        aria-expanded="false"
-        @click="animationEnabled = false"
+    <div
+        class="bell"
+        :data-count="unreadNotificationsCount"
+        :class="{'show-count': unreadNotificationsCount, 'notify': (unreadNotificationsCount && animationEnabled)}"
+    >
+      <span class="fas fa-bell" />
+    </div>
+  </a>
+  <ul class="dropdown-menu notification-dropdown">
+    <li
+        v-if="loading"
+        class="progress"
     >
       <div
-          class="bell"
-          :data-count="unreadNotificationsCount"
-          :class="{'show-count': unreadNotificationsCount, 'notify': (unreadNotificationsCount && animationEnabled)}"
+          class="progress-bar progress-bar-striped active"
+          role="progressbar"
+          aria-valuenow="100"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          style="width: 100%"
       >
-        <span class="fas fa-bell" />
+        <span class="sr-only">
+          {{ $t('notification_viewer.loading') }}
+        </span>
       </div>
-    </a>
-    <ul class="dropdown-menu notification-dropdown">
+    </li>
+    <template v-else-if="error">
       <li
-          v-if="loading"
-          class="progress"
-      >
+          role="separator"
+          class="divider"
+      />
+      <li>
         <div
-            class="progress-bar progress-bar-striped active"
-            role="progressbar"
-            aria-valuenow="100"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            style="width: 100%"
+            class="alert alert-warning"
+            role="alert"
         >
-          <span class="sr-only">
-            {{ $t('notification_viewer.loading') }}
-          </span>
+          {{ error }}
         </div>
       </li>
-      <template v-else-if="error">
-        <li
-            role="separator"
-            class="divider"
-        />
-        <li>
-          <div
-              class="alert alert-warning"
-              role="alert"
-          >
-            {{ error }}
-          </div>
-        </li>
-      </template>
-      <li v-if="!notifications.length">
-        {{ $t('notification_viewer.no_notifications') }}
-      </li>
-      <template v-else>
-        <li>
-          <a
-              class="btn"
-              :class="{ disabled: !unreadNotificationsCount }"
-              @click="markAllAsRead"
-          >
-            {{ $t('notification_viewer.mark_all_as_read') }}
-          </a>
-        </li>
-        <li
-            role="separator"
-            class="divider"
-        />
-        <NotificationEntry
-            v-for="notification in notifications"
-            :key="notification.uuid"
-            :uuid="notification.uuid"
-            :state="notification.state"
-            :sent-at="notification.sent_at"
-            :payload="notification.payload"
-            :truncate-length="truncateLength"
-            @toggle="toggleState"
-        />
-        <li
-            v-if="hasNextPage"
-            class="text-center"
+    </template>
+    <li v-if="!notifications.length">
+      {{ $t('notification_viewer.no_notifications') }}
+    </li>
+    <template v-else>
+      <li>
+        <a
+            class="btn"
+            :class="{ disabled: !unreadNotificationsCount }"
+            @click="markAllAsRead"
         >
-          <button
-              type="button"
-              class="btn btn-link"
-              @click="loadMore"
-          >
-            {{ $t('notification_viewer.load_more') }}
-          </button>
-        </li>
-      </template>
-    </ul>
-  </li>
+          {{ $t('notification_viewer.mark_all_as_read') }}
+        </a>
+      </li>
+      <li
+          role="separator"
+          class="divider"
+      />
+      <NotificationEntry
+          v-for="notification in notifications"
+          :key="notification.uuid"
+          :uuid="notification.uuid"
+          :state="notification.state"
+          :sent-at="notification.sent_at"
+          :payload="notification.payload"
+          :truncate-length="truncateLength"
+          @toggle="toggleState"
+      />
+      <li
+          v-if="hasNextPage"
+          class="text-center"
+      >
+        <button
+            type="button"
+            class="btn btn-link"
+            @click="loadMore"
+        >
+          {{ $t('notification_viewer.load_more') }}
+        </button>
+      </li>
+    </template>
+  </ul>
 </template>
 
 <script lang="ts">
