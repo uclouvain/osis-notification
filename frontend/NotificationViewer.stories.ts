@@ -68,7 +68,9 @@ export const NoNotification: StoryFn<typeof NotificationViewer> = () => {
     components: {NotificationViewer},
     template: `
       <ul class="nav navbar-nav">
-      <NotificationViewer baseUrl="/" />
+        <li id="notification-viewer" class="dropdown">
+          <NotificationViewer baseUrl="/" />
+        </li>
       </ul>
     `,
   };
@@ -107,7 +109,9 @@ export const WithNotifications: StoryFn<typeof NotificationViewer> = () => {
     components: {NotificationViewer},
     template: `
       <ul class="nav navbar-nav">
-      <NotificationViewer baseUrl="/" :interval="10" :limit="2" />
+        <li id="notification-viewer" class="dropdown">
+          <NotificationViewer baseUrl="/" :interval="10" :limit="2" />
+        </li>
       </ul>
     `,
   };
@@ -123,7 +127,9 @@ export const WithErrors: StoryFn<typeof NotificationViewer> = () => {
     components: {NotificationViewer},
     template: `
       <ul class="nav navbar-nav">
-      <NotificationViewer baseUrl="/" :interval="10" />
+        <li id="notification-viewer" class="dropdown">
+          <NotificationViewer baseUrl="/" :interval="10" />
+        </li>
       </ul>
     `,
   };
