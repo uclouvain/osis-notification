@@ -25,40 +25,13 @@
  */
 
 import {createI18n} from 'vue-i18n';
+import fr from "./locales/fr";
+import en from "./locales/en";
 
-const messages = {
-  en: {
-    notification_viewer: {
-      mark_all_as_read: 'Mark all as read',
-      error: 'An error occurred, please try again later.',
-      load_more: 'Load more',
-      loading: 'Loading...',
-      no_notifications: 'No notifications.',
-    },
-    notification: {
-      mark_as_read: 'Mark as read',
-      mark_as_unread: 'Mark as unread',
-      show_less: 'Show less',
-      show_more: 'Show more',
-    },
-  },
-  'fr-be': {
-    notification_viewer: {
-      mark_all_as_read: 'Tout marquer comme lu',
-      error: 'Une erreur s\'est produite, veuillez réessayer plus tard.',
-      load_more: 'Afficher plus',
-      loading: 'Chargement...',
-      no_notifications: 'Pas de notifications.',
-    },
-    notification: {
-      mark_as_read: 'Marquer comme lu',
-      mark_as_unread: 'Marquer comme non-lu',
-      show_less: 'Voir moins',
-      show_more: 'Voir plus',
-    },
-  },
-};
 export const i18n = createI18n({
   locale: document.documentElement.lang || 'en',
-  messages,
+  messages: {
+    en,
+    fr,
+  },
 });
