@@ -47,6 +47,7 @@ from osis_notification.models.enums import NotificationStates
 
 UNKNOWN_PERSON = object()
 
+
 class EmailNotificationHandler:
     @staticmethod
     def build(notification: EmailNotificationType) -> EmailMessage:
@@ -112,6 +113,7 @@ class EmailNotificationHandler:
 
         subject = make_header(decode_header(email_message.get("subject")))
         cc = email_message.get("Cc")
+        from_email = email_message.get('from', settings.DEFAULT_FROM_EMAIL)
         if cc:
             cc = [Person(email=cc_email) for cc_email in cc.split(',')]
         for mail_sender_class in settings.MAIL_SENDER_CLASSES:
@@ -123,7 +125,7 @@ class EmailNotificationHandler:
                 subject=unescape(strip_tags(str(subject))),
                 message=plain_text_content.rstrip(),
                 html_message=html_content.rstrip(),
-                from_email=settings.DEFAULT_FROM_EMAIL,
+                from_email=from_email,
                 attachment=None,
                 cc=cc,
             )
