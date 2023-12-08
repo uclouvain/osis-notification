@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import base64
 import re
 from urllib.parse import urlparse
 
@@ -51,8 +52,10 @@ def proxy_view(view_cls):
         url = settings.OSIS_NOTIFICATION_BASE_URL + url_for_remote_api.replace(local_base_url, '')
         headers = {
             'accept-language': request.user.person.language or settings.LANGUAGE_CODE,
-            'x-user-firstname': request.user.person.first_name or '',
-            'x-user-lastname': request.user.person.last_name or '',
+            'x-user-firstname': convert_str_to_base64_str(request.user.person.first_name)
+            if request.user.person.first_name else '',
+            'x-user-lastname': convert_str_to_base64_str(request.user.person.last_name)
+            if request.user.person.last_name else '',
             'x-user-email': request.user.email or '',
             'x-user-globalid': request.user.person.global_id,
             'authorization': f"ESB {settings.REST_FRAMEWORK_ESB_AUTHENTICATION_SECRET_KEY}",
@@ -97,6 +100,16 @@ def proxy_view(view_cls):
         return proxy_response
 
     return wrapped
+
+
+def convert_str_to_base64_str(s: str) -> str:
+    """
+    This utility allow to convert an str to a base64 represtention of this str (Allow to bypass char issues)
+    but need to be decode on the server-side !
+    """
+    return base64.b64encode(
+        bytes(s, 'utf-8')
+    ).decode('utf-8')
 
 
 def make_absolute_location(base_url, location):

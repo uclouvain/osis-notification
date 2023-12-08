@@ -136,7 +136,7 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 recipient = Person.objects.get(user__username="jmr")
 language = recipient.language
 tokens = {"username": person.user.username}
-email_message = generate_email(your_mail_template_id, language, tokens, recipients=[recipient])
+email_message = generate_email(your_mail_template_id, language, tokens, recipients=[recipient.email])
 email_notification = EmailNotificationHandler.create(email_message)
 ```
 

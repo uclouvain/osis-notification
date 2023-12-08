@@ -27,7 +27,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='OSIS Notification',
-    version='0.1',
+    version='0.1.2',
     description='Notification management API and UI',
     url='http://github.com/uclouvain/osis-notification',
     author='Université catholique de Louvain',
