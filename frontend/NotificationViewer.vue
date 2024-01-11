@@ -25,7 +25,7 @@
   -->
 <template>
   <a
-      class="dropdown-toggle"
+      class="dropdown-toggle nav-link"
       data-toggle="dropdown"
       role="button"
       aria-haspopup="true"
