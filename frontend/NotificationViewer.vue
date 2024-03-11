@@ -27,6 +27,7 @@
   <a
       class="dropdown-toggle nav-link"
       data-toggle="dropdown"
+      data-bs-toggle="dropdown"
       role="button"
       aria-haspopup="true"
       aria-expanded="false"
@@ -40,7 +41,7 @@
       <span class="fas fa-bell" />
     </div>
   </a>
-  <ul class="dropdown-menu notification-dropdown">
+  <ul class="dropdown-menu notification-dropdown dropdown-menu-end">
     <li
         v-if="loading"
         class="progress"
@@ -53,7 +54,7 @@
           aria-valuemax="100"
           style="width: 100%"
       >
-        <span class="sr-only">
+        <span class="sr-only visually-hidden-focusable">
           {{ $t('notification_viewer.loading') }}
         </span>
       </div>
@@ -87,7 +88,7 @@
       </li>
       <li
           role="separator"
-          class="divider"
+          class="divider dropdown-divider"
       />
       <NotificationEntry
           v-for="notification in notifications"

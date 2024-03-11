@@ -30,6 +30,7 @@
         :checked="isSent"
         type="radio"
         data-toggle="tooltip"
+        data-bs-toggle="tooltip"
         :data-original-title="isSent ? $t('notification.mark_as_read') : $t('notification.mark_as_unread')"
         @click.prevent="$emit('toggle', uuid)"
     >
