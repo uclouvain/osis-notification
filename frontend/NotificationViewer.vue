@@ -28,6 +28,7 @@
       class="dropdown-toggle nav-link"
       data-toggle="dropdown"
       data-bs-toggle="dropdown"
+      data-bs-auto-close="outside"
       role="button"
       aria-haspopup="true"
       aria-expanded="false"
